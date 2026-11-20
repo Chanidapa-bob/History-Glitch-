@@ -1,0 +1,4402 @@
+<!DOCTYPE html>
+<html lang="th"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMTM4NjQyMTM4NTc1NDQ4MjYwNyIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzdkMzA0NTc3ODY0OTA2NTJfaGlzdG9yeV9nbGl0Y2guaHRtbC02NzUifSwiZXhwIjoxNzk1MTU1OTY5LCJpYXQiOjE3OTUxNTIzNjksImFsZyI6IlJTMjU2In0.XAt33jDFs4orALbj93TmiahJZyqERCGn8YT2JhFmn5oHPjgGZYSspkIdzldt4tge9-nTH39m6jfveDOyU7XO1NX6S7-QH6kVtniZTe_BZwSXAOIiyFfn5S9YRGSVe1efKIeFg-OgemA6O0JDJyjY1YaEsoFZ2PxVAA_nf5l1zg5dZWD4ZfKWtbjXVfPsVk8PD2y4W31WK8iXGqjae_5bhJwkA7rbI1b1PUAF9KklkeWJTC7lP0v_Rv-Uw30ZcffF56o-v3GBbSUbEaDdD5FkzOvb8LiJp3t-A2Gpfw5ZwecqCyntmmZtcbjTlRHC8RNfIcv1p-gvCbvOmu6vGWgXsA","c_7d30457786490652_history_glitch.html-675")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>History Glitch: กู้คืนไทม์ไลน์ประวัติศาสตร์</title>
+  <style>
+    /* =========================================================================
+       1. DESIGN TOKENS & VARIABLES (ระบบสีและค่าพื้นฐานธีมอวกาศไซเบอร์)
+       ========================================================================= */
+    :root {
+      --bg-deep: #060B19;
+      --bg-panel: #0D152C;
+      --bg-card: rgba(16, 27, 56, 0.85);
+      --bg-glass: rgba(13, 21, 44, 0.78);
+      --neon-cyan: #00F0FF;
+      --neon-cyan-dim: rgba(0, 240, 255, 0.2);
+      --cyber-purple: #9D4EDD;
+      --cyber-purple-dim: rgba(157, 78, 221, 0.22);
+      --ancient-gold: #FFD166;
+      --ancient-gold-dim: rgba(255, 209, 102, 0.2);
+      --success-green: #06D6A0;
+      --success-green-dim: rgba(6, 214, 160, 0.22);
+      --glitch-red: #FF2A6D;
+      --glitch-red-dim: rgba(255, 42, 109, 0.22);
+      --text-main: #F0F6FC;
+      --text-muted: #94A3B8;
+      --border-glow: rgba(0, 240, 255, 0.35);
+      --font-thai: 'Prompt', 'Kanit', 'Sarabun', 'Noto Sans Thai', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --shadow-neon: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    /* =========================================================================
+       2. RESET & BASE STYLES (รีเซ็ตและพื้นหลังอวกาศเคลื่อนไหว)
+       ========================================================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      line-height: 1.55;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* พื้นหลังตารางกริดไซเบอร์ + ดวงดาวระยิบระยับ */
+    .space-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(157, 78, 221, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 82% 75%, rgba(0, 240, 255, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, #0D152C 0%, #060B19 100%);
+    }
+
+    .cyber-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.06) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at center, black 45%, transparent 95%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 45%, transparent 95%);
+    }
+
+    #starfield-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* เอฟเฟกต์เส้นสแกนไลน์โฮโลแกรม */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0px,
+        rgba(255, 255, 255, 0) 3px,
+        rgba(0, 240, 255, 0.025) 4px
+      );
+    }
+
+    /* คอนเทนเนอร์หลัก */
+    .app-wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================================
+       3. KEYFRAME ANIMATIONS (แอนิเมชัน Glitch, ลอยตัว, สั่นหน้าจอ)
+       ========================================================================= */
+    @keyframes glitchText {
+      0%, 90%, 100% {
+        text-shadow: 2px 0 var(--glitch-red), -2px 0 var(--neon-cyan);
+        transform: translate(0);
+      }
+      92% {
+        text-shadow: -3px 1px var(--glitch-red), 3px -1px var(--neon-cyan);
+        transform: translate(-2px, 1px);
+      }
+      94% {
+        text-shadow: 3px -1px var(--glitch-red), -3px 1px var(--neon-cyan);
+        transform: translate(2px, -1px);
+      }
+      96% {
+        text-shadow: -2px -2px var(--cyber-purple), 2px 2px var(--ancient-gold);
+        transform: translate(-1px, -1px);
+      }
+    }
+
+    @keyframes floatBot {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-9px); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
+      50% { box-shadow: 0 0 24px rgba(0, 240, 255, 0.65); }
+    }
+
+    @keyframes hintPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 2px var(--ancient-gold), 0 0 20px rgba(255, 209, 102, 0.6);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 4px var(--ancient-gold), 0 0 34px rgba(255, 209, 102, 0.95);
+        transform: scale(1.03);
+      }
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      15% { transform: translate(-8px, 4px); }
+      30% { transform: translate(8px, -4px); }
+      45% { transform: translate(-6px, -3px); }
+      60% { transform: translate(6px, 3px); }
+      75% { transform: translate(-4px, 2px); }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .shake-active {
+      animation: screenShake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    /* =========================================================================
+       4. SHARED COMPONENTS (ปุ่ม, การ์ดกระจก, แถบสถานะ)
+       ========================================================================= */
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      animation: popIn 0.38s ease-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .glass-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      min-height: 46px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-thai);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00F0FF 0%, #0099CC 100%);
+      color: #04101E;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 28px rgba(0, 240, 255, 0.65);
+      transform: translateY(-2px);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #9D4EDD 0%, #6A1B9A 100%);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 0 16px rgba(157, 78, 221, 0.35);
+    }
+
+    .btn-purple:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #FFD166 0%, #F4A261 100%);
+      color: #1A1200;
+      box-shadow: 0 0 16px rgba(255, 209, 102, 0.35);
+    }
+
+    .btn-gold:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: rgba(13, 21, 44, 0.75);
+      color: var(--text-main);
+      border-color: rgba(0, 240, 255, 0.35);
+    }
+
+    .btn-outline:hover {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--neon-cyan);
+    }
+
+    .btn-danger {
+      background: rgba(255, 42, 109, 0.18);
+      color: #FF759F;
+      border-color: rgba(255, 42, 109, 0.45);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 42, 109, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* =========================================================================
+       5. START SCREEN (หน้าจอต้อนรับ)
+       ========================================================================= */
+    .start-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px 16px;
+    }
+
+    .curriculum-pill {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid rgba(157, 78, 221, 0.5);
+      color: #E0AAFF;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    .glitch-title {
+      font-family: var(--font-mono);
+      font-size: clamp(2.1rem, 6vw, 4.1rem);
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #FFFFFF;
+      animation: glitchText 3.2s infinite;
+      line-height: 1.15;
+    }
+
+    .thai-subtitle {
+      font-size: clamp(1.25rem, 3.2vw, 1.95rem);
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--ancient-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 6px;
+      margin-bottom: 18px;
+    }
+
+    .hero-bot-showcase {
+      margin: 10px auto 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-mission-box {
+      max-width: 720px;
+      padding: 20px 24px;
+      margin-bottom: 26px;
+      text-align: left;
+      border-left: 4px solid var(--neon-cyan);
+    }
+
+    .hero-mission-box h3 {
+      color: var(--neon-cyan);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-mission-box p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .start-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .start-actions-grid .btn-primary {
+      grid-column: 1 / -1;
+      font-size: 1.18rem;
+      padding: 15px 28px;
+    }
+
+    /* =========================================================================
+       6. CHRONO-BOT SVG COMPONENT (ตัวละครผู้ช่วย AI น้องไทม์)
+       ========================================================================= */
+    .chrono-bot-avatar {
+      width: 84px;
+      height: 84px;
+      flex-shrink: 0;
+      animation: floatBot 3.4s ease-in-out infinite;
+      filter: drop-shadow(0 6px 14px rgba(0, 240, 255, 0.35));
+    }
+
+    .chrono-bot-avatar.large {
+      width: 112px;
+      height: 112px;
+    }
+
+    .bot-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      margin-bottom: 14px;
+      border-color: rgba(157, 78, 221, 0.45);
+    }
+
+    .bot-speech {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .bot-name-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 3px;
+    }
+
+    .bot-message-text {
+      font-size: 0.94rem;
+      color: var(--text-main);
+      word-wrap: break-word;
+    }
+
+    /* =========================================================================
+       7. GAMEPLAY HUD (แถบสถานะห้องควบคุมกาลเวลา)
+       ========================================================================= */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: 1.3fr 1.2fr 1.3fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      margin-bottom: 14px;
+    }
+
+    .hud-stage-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stage-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--neon-cyan-dim);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .badge-pill.gold {
+      background: var(--ancient-gold-dim);
+      color: var(--ancient-gold);
+      border-color: rgba(255, 209, 102, 0.4);
+    }
+
+    .badge-pill.purple {
+      background: var(--cyber-purple-dim);
+      color: #E0AAFF;
+      border-color: rgba(157, 78, 221, 0.45);
+    }
+
+    .hud-stage-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* ตัวจับเวลานับถอยหลัง */
+    .hud-timer-box {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .timer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .timer-value {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .timer-value.warning {
+      color: var(--ancient-gold);
+    }
+
+    .timer-value.danger {
+      color: var(--glitch-red);
+      animation: glitchText 0.6s infinite;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--cyber-purple));
+      transition: width 0.25s linear, background 0.3s ease;
+    }
+
+    .progress-fill.hp-fill {
+      background: linear-gradient(90deg, var(--success-green), #38EF7D);
+    }
+
+    .progress-fill.hp-low {
+      background: linear-gradient(90deg, var(--glitch-red), #FF758F);
+    }
+
+    /* คะแนน เหรียญ และ HP */
+    .hud-stats-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stats-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border-radius: 12px;
+      font-size: 1.15rem;
+    }
+
+    /* =========================================================================
+       8. PHASE 1 WORKSPACE: HOLOGRAPHIC CARDS & DROP ZONES
+       ========================================================================= */
+    .gameplay-workspace {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .deck-panel, .zones-panel {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-subhint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* กริดการ์ดข้อมูลโฮโลแกรม */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      align-content: start;
+    }
+
+    .holo-card {
+      position: relative;
+      background: linear-gradient(145deg, rgba(19, 34, 72, 0.92), rgba(10, 18, 40, 0.95));
+      border: 1.5px solid rgba(0, 240, 255, 0.35);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .holo-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(120deg, transparent 30%, rgba(0, 240, 255, 0.09) 50%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .holo-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 6px 22px rgba(0, 240, 255, 0.28);
+    }
+
+    .holo-card.dragging {
+      opacity: 0.55;
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+
+    /* สถานะเมื่อแตะเลือกการ์ด (รองรับมือถือ/แท็บเล็ตและคลิกเลือก) */
+    .holo-card.selected {
+      border-color: var(--ancient-gold);
+      box-shadow: 0 0 0 2px var(--ancient-gold), 0 0 24px rgba(255, 209, 102, 0.45);
+      background: linear-gradient(145deg, rgba(45, 38, 22, 0.92), rgba(15, 23, 48, 0.95));
+    }
+
+    .holo-card.hint-highlight {
+      animation: hintPulse 1.2s infinite;
+      border-color: var(--ancient-gold);
+    }
+
+    .card-icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-icon-box svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* โซนกล่องวางการ์ด (Drop Zones) */
+    .zones-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .drop-zone {
+      flex: 1;
+      min-height: 185px;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.22s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .drop-zone.era-zone {
+      background: linear-gradient(160deg, rgba(0, 240, 255, 0.08) 0%, rgba(13, 21, 44, 0.88) 100%);
+      border: 2px dashed rgba(0, 240, 255, 0.5);
+    }
+
+    .drop-zone.era-zone.drag-over,
+    .drop-zone.era-zone.ready-target {
+      background: rgba(0, 240, 255, 0.18);
+      border-style: solid;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.3);
+    }
+
+    .drop-zone.quarantine-zone {
+      background: linear-gradient(160deg, rgba(157, 78, 221, 0.12) 0%, rgba(25, 11, 36, 0.88) 100%);
+      border: 2px dashed rgba(255, 42, 109, 0.55);
+    }
+
+    .drop-zone.quarantine-zone.drag-over,
+    .drop-zone.quarantine-zone.ready-target {
+      background: rgba(255, 42, 109, 0.18);
+      border-style: solid;
+      border-color: var(--glitch-red);
+      box-shadow: 0 0 24px rgba(255, 42, 109, 0.3);
+    }
+
+    .zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .zone-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .era-zone .zone-title { color: var(--neon-cyan); }
+    .quarantine-zone .zone-title { color: #FF759F; }
+
+    .zone-counter {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .zone-instruction {
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .placed-chips-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-content: flex-start;
+    }
+
+    .placed-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      animation: popIn 0.25s ease-out;
+    }
+
+    .placed-chip.valid {
+      background: var(--success-green-dim);
+      border: 1px solid var(--success-green);
+      color: #A7F3D0;
+    }
+
+    .placed-chip.quarantined {
+      background: var(--cyber-purple-dim);
+      border: 1px solid var(--cyber-purple);
+      color: #E9D5FF;
+    }
+
+    /* แบนเนอร์ Feedback ประวัติศาสตร์ทันทีเมื่อวางผิด */
+    .instant-feedback-box {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 42, 109, 0.16);
+      border: 1px solid var(--glitch-red);
+      color: #FFE4EC;
+      font-size: 0.88rem;
+      display: none;
+      animation: popIn 0.25s ease;
+    }
+
+    .instant-feedback-box.visible {
+      display: block;
+    }
+
+    .instant-feedback-box strong {
+      color: var(--ancient-gold);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    /* =========================================================================
+       9. MODALS (หน้าต่าง Quiz ยืนยันไทม์ไลน์, วิธีเล่น, ยืนยันออกจากด่าน)
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 8, 20, 0.84);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 680px;
+      padding: 24px;
+      border: 1.5px solid var(--neon-cyan);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+      animation: popIn 0.3s ease-out;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .quiz-top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .quiz-question-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .quiz-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(19, 34, 72, 0.85);
+      border: 1.5px solid rgba(0, 240, 255, 0.3);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      font-size: 0.98rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option-btn:hover:not(:disabled) {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.14);
+      transform: translateX(4px);
+    }
+
+    .quiz-option-btn .opt-letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--neon-cyan);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quiz-option-btn.correct {
+      background: var(--success-green-dim);
+      border-color: var(--success-green);
+      color: #FFFFFF;
+    }
+
+    .quiz-option-btn.correct .opt-letter {
+      background: var(--success-green);
+      color: #04101E;
+    }
+
+    .quiz-option-btn.wrong {
+      background: var(--glitch-red-dim);
+      border-color: var(--glitch-red);
+      color: #FFD6E4;
+    }
+
+    .quiz-option-btn.wrong .opt-letter {
+      background: var(--glitch-red);
+      color: #FFFFFF;
+    }
+
+    .quiz-option-btn.eliminated {
+      opacity: 0.32;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+
+    .quiz-explanation-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(0, 240, 255, 0.1);
+      border-left: 4px solid var(--neon-cyan);
+      font-size: 0.92rem;
+      color: #E2E8F0;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .quiz-explanation-box.visible {
+      display: block;
+      animation: popIn 0.25s ease;
+    }
+
+    /* =========================================================================
+       10. SUMMARY & LEARNING ANALYTICS DASHBOARD (หน้าสรุปผลและวิเคราะห์การเรียนรู้)
+       ========================================================================= */
+    .dashboard-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding-bottom: 28px;
+    }
+
+    .result-hero-banner {
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-hero-banner.victory {
+      border-color: var(--success-green);
+      background: linear-gradient(160deg, rgba(6, 214, 160, 0.16) 0%, rgba(13, 21, 44, 0.9) 100%);
+    }
+
+    .result-hero-banner.defeat {
+      border-color: var(--glitch-red);
+      background: linear-gradient(160deg, rgba(255, 42, 109, 0.16) 0%, rgba(13, 21, 44, 0.9) 100%);
+    }
+
+    .result-status-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      margin: 8px 0 6px;
+    }
+
+    .stars-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .star-svg {
+      width: 42px;
+      height: 42px;
+      transition: transform 0.3s ease;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      padding: 16px;
+      text-align: center;
+      border-radius: var(--radius-md);
+      background: rgba(16, 27, 56, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+    }
+
+    .metric-value.gold { color: var(--ancient-gold); }
+    .metric-value.green { color: var(--success-green); }
+    .metric-value.purple { color: #D8B4FE; }
+
+    .analytics-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .analytics-card {
+      padding: 20px;
+    }
+
+    .analytics-card h3 {
+      font-size: 1.08rem;
+      color: var(--neon-cyan);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* กราฟแท่งเปรียบเทียบความแม่นยำแต่ละยุคสมัย */
+    .era-chart-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .era-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .era-bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .era-bar-track {
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .era-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ตราประทับเกียรติยศ (Badges) */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 10px;
+    }
+
+    .badge-item {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+      opacity: 0.42;
+      filter: grayscale(1);
+      transition: all 0.3s ease;
+    }
+
+    .badge-item.unlocked {
+      opacity: 1;
+      filter: none;
+      background: linear-gradient(145deg, rgba(255, 209, 102, 0.15), rgba(157, 78, 221, 0.15));
+      border-color: var(--ancient-gold);
+      box-shadow: 0 0 16px rgba(255, 209, 102, 0.25);
+    }
+
+    .badge-item-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .badge-item-desc {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* กล่องข้อเสนอแนะรายบุคคล */
+    .recommendation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rec-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(157, 78, 221, 0.12);
+      border-left: 3px solid var(--cyber-purple);
+      font-size: 0.9rem;
+      color: #E2E8F0;
+    }
+
+    .rec-item.warn {
+      background: rgba(255, 42, 109, 0.12);
+      border-left-color: var(--glitch-red);
+    }
+
+    .rec-item.good {
+      background: rgba(6, 214, 160, 0.12);
+      border-left-color: var(--success-green);
+    }
+
+    /* ตารางประวัติการเล่นใน LocalStorage */
+    .history-table-wrap {
+      overflow-x: auto;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .history-table th, .history-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .history-table th {
+      color: var(--neon-cyan);
+      font-weight: 700;
+    }
+
+    /* =========================================================================
+       11. TOAST NOTIFICATION & PARTICLES
+       ========================================================================= */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: calc(100vw - 40px);
+    }
+
+    .toast-msg {
+      padding: 12px 18px;
+      border-radius: 12px;
+      background: rgba(13, 21, 44, 0.95);
+      border: 1px solid var(--neon-cyan);
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      animation: popIn 0.25s ease;
+    }
+
+    .toast-msg.success { border-color: var(--success-green); color: #A7F3D0; }
+    .toast-msg.error { border-color: var(--glitch-red); color: #FECDD3; }
+    .toast-msg.gold { border-color: var(--ancient-gold); color: var(--ancient-gold); }
+
+    /* =========================================================================
+       12. RESPONSIVE BREAKPOINTS (รองรับ Tablet และ Mobile อย่างสมบูรณ์)
+       ========================================================================= */
+    @media (max-width: 1024px) {
+      .hud-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+      .gameplay-workspace {
+        grid-template-columns: 1fr;
+      }
+      /* บนหน้าจอขนาดกลาง/เล็ก ให้กล่องวางอยู่ด้านบนหรือเข้าถึงง่าย */
+      .zones-stack {
+        flex-direction: row;
+      }
+      .drop-zone {
+        min-height: 155px;
+      }
+      .analytics-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app-wrapper {
+        padding: 10px;
+      }
+      .hud-bar {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .hud-controls {
+        justify-content: flex-end;
+      }
+      .bot-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .bot-bar-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+      }
+      .bot-bar .btn {
+        width: 100%;
+      }
+      .zones-stack {
+        flex-direction: column;
+      }
+      .drop-zone {
+        min-height: 120px;
+        padding: 12px;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .holo-card {
+        padding: 11px;
+      }
+      .modal-card {
+        padding: 18px;
+      }
+      .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- พื้นหลังอวกาศ เส้นกริด และแคนวาสหมู่ดาว -->
+  <div class="space-bg"></div>
+  <div class="cyber-grid"></div>
+  <canvas id="starfield-canvas" width="707" height="828"></canvas>
+  <div class="scanlines"></div>
+
+  <!-- คอนเทนเนอร์หลักของแอปพลิเคชัน -->
+  <div class="app-wrapper" id="app-root">
+
+    <!-- =====================================================================
+         หน้าจอที่ 1: หน้าต้อนรับ (START SCREEN)
+         ===================================================================== -->
+    <section id="screen-start" class="screen active" aria-label="หน้าจอเริ่มต้นเกม">
+      <div class="start-container">
+        <div class="curriculum-pill">
+          <span>รายวิชาประวัติศาสตร์</span>
+          <span>•</span>
+          <span>กลุ่มสาระฯ สังคมศึกษา ศาสนา และวัฒนธรรม</span>
+          <span>•</span>
+          <span>ระดับชั้น ม.4–ม.6</span>
+        </div>
+
+        <h1 class="glitch-title">HISTORY GLITCH</h1>
+        <h2 class="thai-subtitle">กู้คืนไทม์ไลน์ประวัติศาสตร์</h2>
+
+        <!-- ตัวละคร CHRONO-BOT หน้าต้อนรับ -->
+        <div class="hero-bot-showcase">
+          <div id="start-bot-mount">
+          <svg class="chrono-bot-avatar large" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="botBodyGrad_normal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1E293B"></stop>
+                <stop offset="100%" stop-color="#0F172A"></stop>
+              </linearGradient>
+            </defs>
+            <!-- วงแหวนพลังงานด้านหลัง -->
+            <ellipse cx="50" cy="50" rx="44" ry="18" fill="none" stroke="#00F0FF" stroke-width="1.4" opacity="0.45" transform="rotate(-18 50 50)"></ellipse>
+            <!-- เสาอากาศไซไฟ -->
+            <line x1="50" y1="10" x2="50" y2="22" stroke="#00F0FF" stroke-width="3" stroke-linecap="round"></line>
+            <circle cx="50" cy="8" r="4.5" fill="#00F0FF"></circle>
+            <!-- หูฟังข้างศีรษะ -->
+            <rect x="14" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"></rect>
+            <rect x="79" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"></rect>
+            <!-- ส่วนหัวหุ่นยนต์ -->
+            <rect x="20" y="22" width="60" height="48" rx="18" fill="url(#botBodyGrad_normal)" stroke="#00F0FF" stroke-width="2.5"></rect>
+            <!-- หน้าจอแสดงอารมณ์ -->
+            <rect x="26" y="30" width="48" height="32" rx="11" fill="#060B19" stroke="rgba(255,255,255,0.15)" stroke-width="1"></rect>
+            
+            <circle cx="38" cy="44" r="4.5" fill="#00F0FF"></circle>
+            <circle cx="62" cy="44" r="4.5" fill="#00F0FF"></circle>
+            <circle cx="39.5" cy="42.5" r="1.5" fill="#FFFFFF"></circle>
+            <circle cx="63.5" cy="42.5" r="1.5" fill="#FFFFFF"></circle>
+            <path d="M42 53 Q50 60 58 53" stroke="#00F0FF" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+          
+            <!-- ลำตัวลอยและไอพ่นด้านล่าง -->
+            <path d="M36 73 L64 73 L58 86 L42 86 Z" fill="#1E293B" stroke="#00F0FF" stroke-width="1.8"></path>
+            <ellipse cx="50" cy="91" rx="11" ry="3.5" fill="#00F0FF" opacity="0.75"></ellipse>
+          </svg>
+        </div>
+          <span class="badge-pill">AI ผู้ดูแลระบบกาลเวลา: CHRONO-BOT (น้องไทม์)</span>
+        </div>
+
+        <div class="glass-panel hero-mission-box">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            ภารกิจฉุกเฉินจากศูนย์ควบคุมกาลเวลา (Time Control Center)
+          </h3>
+          <p>
+            เกิดความผิดปกติทางมิติเวลา (Timeline Glitch) ทำให้เหตุการณ์ บุคคลสำคัญ และสิ่งประดิษฐ์ข้ามยุคสมัยปะปนกัน!
+            จงช่วย <strong>CHRONO-BOT</strong> คัดแยกข้อมูลประจำยุค กักกันข้อมูลผิดยุค (Glitch Anomaly)
+            และตอบคำถามยืนยันระบบให้ครบทั้ง <strong>3 ยุคสมัย</strong> ด้วยความแม่นยำรวม <strong>70% ขึ้นไป</strong>
+          </p>
+        </div>
+
+        <div class="start-actions-grid">
+          <button type="button" class="btn btn-primary" id="btn-start-game">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            เริ่มกู้คืนไทม์ไลน์
+          </button>
+
+          <button type="button" class="btn btn-outline" id="btn-open-howto">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            วิธีเล่น
+          </button>
+
+          <button type="button" class="btn btn-purple" id="btn-open-dashboard-start">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Dashboard ผลการเรียนรู้
+          </button>
+
+          <button type="button" class="btn btn-outline" id="btn-sound-start">
+            <span id="sound-start-label">🔊 เสียง: เปิด</span>
+          </button>
+
+          <button type="button" class="btn btn-gold" id="btn-download-html">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            ดาวน์โหลดไฟล์เกม (.html)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         หน้าจอที่ 2: ห้องควบคุมกาลเวลา (TIME CONTROL CENTER - GAMEPLAY)
+         ===================================================================== -->
+    <section id="screen-game" class="screen" aria-label="หน้าจอเล่นเกม">
+      <!-- แถบสถานะด้านบน (HUD) -->
+      <header class="glass-panel hud-bar">
+        <div class="hud-stage-info">
+          <div class="stage-badge-row">
+            <span class="badge-pill" id="hud-stage-num">ด่านที่ 1/3</span>
+            <span class="badge-pill purple" id="hud-difficulty">ระดับง่าย</span>
+            <span class="badge-pill gold" id="hud-phase-label">เฟส 1: คัดแยกไทม์ไลน์</span>
+          </div>
+          <div class="hud-stage-title" id="hud-stage-name">ยุคโบราณ (Ancient Era)</div>
+        </div>
+
+        <!-- ตัวจับเวลานับถอยหลังต่อรายการ -->
+        <div class="hud-timer-box">
+          <div class="timer-header">
+            <span>⏱ เวลาต่อรายการ</span>
+            <span class="timer-value" id="hud-timer-text">30.0s</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="hud-timer-bar"></div>
+          </div>
+        </div>
+
+        <!-- คะแนน เหรียญทอง และความเสถียรของระบบ (HP) -->
+        <div class="hud-stats-group">
+          <div class="stats-top-row">
+            <span class="stat-chip" style="color: var(--neon-cyan);">
+              ⚡ คะแนน: <strong id="hud-score">0</strong>
+            </span>
+            <span class="stat-chip" style="color: var(--ancient-gold);">
+              🪙 เหรียญ: <strong id="hud-coins">0</strong>
+            </span>
+            <span class="stat-chip" style="color: var(--success-green);">
+              🛡️ HP: <strong id="hud-hp-text">100%</strong>
+            </span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill hp-fill" id="hud-hp-bar"></div>
+          </div>
+        </div>
+
+        <!-- ปุ่มควบคุมเสียงและกลับหน้าหลัก -->
+        <div class="hud-controls">
+          <button type="button" class="btn btn-outline icon-btn" id="btn-sound-game" title="เปิด/ปิดเสียง">🔊</button>
+          <button type="button" class="btn btn-danger icon-btn" id="btn-quit-game" title="ออกจากภารกิจ">✕</button>
+        </div>
+      </header>
+
+      <!-- แถบสื่อสารกับ CHRONO-BOT และปุ่มขอคำใบ้ AI -->
+      <div class="glass-panel bot-bar">
+        <div class="bot-bar-top" style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
+          <div id="game-bot-mount">
+          <svg class="chrono-bot-avatar " viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="botBodyGrad_normal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1E293B"></stop>
+                <stop offset="100%" stop-color="#0F172A"></stop>
+              </linearGradient>
+            </defs>
+            <!-- วงแหวนพลังงานด้านหลัง -->
+            <ellipse cx="50" cy="50" rx="44" ry="18" fill="none" stroke="#00F0FF" stroke-width="1.4" opacity="0.45" transform="rotate(-18 50 50)"></ellipse>
+            <!-- เสาอากาศไซไฟ -->
+            <line x1="50" y1="10" x2="50" y2="22" stroke="#00F0FF" stroke-width="3" stroke-linecap="round"></line>
+            <circle cx="50" cy="8" r="4.5" fill="#00F0FF"></circle>
+            <!-- หูฟังข้างศีรษะ -->
+            <rect x="14" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"></rect>
+            <rect x="79" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"></rect>
+            <!-- ส่วนหัวหุ่นยนต์ -->
+            <rect x="20" y="22" width="60" height="48" rx="18" fill="url(#botBodyGrad_normal)" stroke="#00F0FF" stroke-width="2.5"></rect>
+            <!-- หน้าจอแสดงอารมณ์ -->
+            <rect x="26" y="30" width="48" height="32" rx="11" fill="#060B19" stroke="rgba(255,255,255,0.15)" stroke-width="1"></rect>
+            
+            <circle cx="38" cy="44" r="4.5" fill="#00F0FF"></circle>
+            <circle cx="62" cy="44" r="4.5" fill="#00F0FF"></circle>
+            <circle cx="39.5" cy="42.5" r="1.5" fill="#FFFFFF"></circle>
+            <circle cx="63.5" cy="42.5" r="1.5" fill="#FFFFFF"></circle>
+            <path d="M42 53 Q50 60 58 53" stroke="#00F0FF" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+          
+            <!-- ลำตัวลอยและไอพ่นด้านล่าง -->
+            <path d="M36 73 L64 73 L58 86 L42 86 Z" fill="#1E293B" stroke="#00F0FF" stroke-width="1.8"></path>
+            <ellipse cx="50" cy="91" rx="11" ry="3.5" fill="#00F0FF" opacity="0.75"></ellipse>
+          </svg>
+        </div>
+          <div class="bot-speech">
+            <div class="bot-name-tag">
+              <span>● CHRONO-BOT (น้องไทม์)</span>
+              <span id="bot-mood-label" style="color: var(--text-muted); font-weight:500;">[สถานะ: พร้อมวิเคราะห์]</span>
+            </div>
+            <div class="bot-message-text" id="bot-message">
+              สวัสดีผู้พิทักษ์กาลเวลา! ลากการ์ดประวัติศาสตร์ (หรือแตะเลือกการ์ดแล้วแตะกล่องเป้าหมาย) เพื่อคัดแยกข้อมูลให้ถูกต้องนะ!
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-gold" id="btn-ai-hint">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M9 18h6"></path>
+            <path d="M10 22h4"></path>
+            <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"></path>
+          </svg>
+          ขอคำใบ้ AI (-50 คะแนน)
+        </button>
+      </div>
+
+      <!-- พื้นที่เล่นหลัก เฟสที่ 1: คัดแยกการ์ดโฮโลแกรม -->
+      <div class="gameplay-workspace">
+        <!-- ฝั่งซ้าย: คลังการ์ดข้อมูล -->
+        <div class="glass-panel deck-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              คลังข้อมูลไทม์ไลน์ (เหลือ <span id="cards-remaining-count">8</span>/8 ใบ)
+            </div>
+            <span class="panel-subhint">ลากวาง หรือ แตะเลือกการ์ดแล้วแตะกล่อง</span>
+          </div>
+
+          <div class="cards-grid" id="cards-deck-grid">
+            <!-- การ์ดโฮโลแกรมจะถูกสร้างโดย JavaScript -->
+          </div>
+
+          <!-- กล่องแสดงคำอธิบายทันทีเมื่อวางผิด -->
+          <div class="instant-feedback-box" id="instant-feedback-box"></div>
+        </div>
+
+        <!-- ฝั่งขวา: กล่องเป้าหมาย 2 กล่อง -->
+        <div class="glass-panel zones-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+              ช่องบรรจุข้อมูลกาลเวลา (Drop Zones)
+            </div>
+            <span class="panel-subhint" id="selected-card-indicator">ยังไม่ได้เลือกการ์ด</span>
+          </div>
+
+          <div class="zones-stack">
+            <!-- กล่องที่ 1: ไทม์ไลน์ประจำยุค -->
+            <div class="drop-zone era-zone" id="zone-era" data-zone="era" role="button" tabindex="0">
+              <div class="zone-header">
+                <div class="zone-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span id="zone-era-title">ไทม์ไลน์: ยุคโบราณ</span>
+                </div>
+                <span class="zone-counter" id="zone-era-count">0 / 6</span>
+              </div>
+              <div class="zone-instruction">
+                วางเหตุการณ์ บุคคลสำคัญ หรือสิ่งประดิษฐ์ที่เกิดขึ้นในยุคสมัยนี้ (6 ใบ)
+              </div>
+              <div class="placed-chips-list" id="zone-era-chips"></div>
+            </div>
+
+            <!-- กล่องที่ 2: เขตกักกันข้อมูลผิดยุค -->
+            <div class="drop-zone quarantine-zone" id="zone-quarantine" data-zone="quarantine" role="button" tabindex="0">
+              <div class="zone-header">
+                <div class="zone-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  <span>เขตกักกันข้อมูลผิดยุค (Glitch Quarantine)</span>
+                </div>
+                <span class="zone-counter" id="zone-quarantine-count">0 / 2</span>
+              </div>
+              <div class="zone-instruction">
+                วางการ์ดข้อมูลปนเปื้อนที่ "ไม่ได้อยู่ในยุคสมัยนี้" เพื่อกักกัน (2 ใบ)
+              </div>
+              <div class="placed-chips-list" id="zone-quarantine-chips"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         หน้าจอที่ 3: สรุปผลและ DASHBOARD วิเคราะห์การเรียนรู้รายบุคคล
+         ===================================================================== -->
+    <section id="screen-dashboard" class="screen" aria-label="หน้าสรุปผลและวิเคราะห์การเรียนรู้">
+      <div class="dashboard-container">
+        <!-- แบนเนอร์ผลลัพธ์ (Victory / Game Over / Overview) -->
+        <div class="glass-panel result-hero-banner" id="result-banner">
+          <div id="dashboard-bot-mount" style="display:flex; justify-content:center;"></div>
+          <h2 class="result-status-title" id="result-title">สรุปผลการกู้คืนไทม์ไลน์และสถิติการเรียนรู้</h2>
+          <p id="result-subtitle" style="color: var(--text-muted); max-width: 680px; margin: 0 auto;">
+            ระบบวิเคราะห์ความแม่นยำรายยุคสมัยและสร้างข้อเสนอแนะเฉพาะบุคคลโดย CHRONO-BOT
+          </p>
+
+          <!-- ดาวประเมินผล 1-3 ดาว -->
+          <div class="stars-row" id="result-stars"></div>
+
+          <!-- ตัวชี้วัดหลัก 4 ช่อง -->
+          <div class="metrics-grid" style="margin-top: 16px;">
+            <div class="metric-card">
+              <div class="metric-label">คะแนนรวมภารกิจ</div>
+              <div class="metric-value" id="dash-score">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">สถิติคะแนนสูงสุด (High Score)</div>
+              <div class="metric-value purple" id="dash-highscore">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">เหรียญทองที่ได้รับ</div>
+              <div class="metric-value gold" id="dash-coins">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">อัตราความแม่นยำรวม (Accuracy)</div>
+              <div class="metric-value green" id="dash-accuracy">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- กราฟวิเคราะห์รายยุค + ข้อเสนอแนะรายบุคคล -->
+        <div class="analytics-two-col">
+          <div class="glass-panel analytics-card">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              วิเคราะห์ความแม่นยำแยกตามยุคสมัย
+            </h3>
+            <div class="era-chart-list" id="era-chart-container">
+              <!-- สร้างโดย JS -->
+            </div>
+          </div>
+
+          <div class="glass-panel analytics-card">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"></path>
+                <line x1="9" y1="21" x2="15" y2="21"></line>
+              </svg>
+              ข้อเสนอแนะรายบุคคล (AI Learning Diagnosis)
+            </h3>
+            <div class="recommendation-list" id="recommendations-container">
+              <!-- สร้างโดย JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ตราประทับเกียรติยศ (Badges) -->
+        <div class="glass-panel analytics-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="7"></circle>
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+            ตราประทับเกียรติยศผู้พิทักษ์ไทม์ไลน์ (Timeline Badges)
+          </h3>
+          <div class="badges-grid" id="badges-container">
+            <!-- สร้างโดย JS -->
+          </div>
+        </div>
+
+        <!-- ประวัติการเล่นที่บันทึกใน LocalStorage -->
+        <div class="glass-panel analytics-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <h3 style="margin-bottom:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              บันทึกสถิติการเรียนรู้ (LocalStorage)
+            </h3>
+            <button type="button" class="btn btn-danger" id="btn-clear-history" style="padding:6px 14px; min-height:36px; font-size:0.82rem;">
+              ล้างประวัติสถิติ
+            </button>
+          </div>
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>ครั้งที่</th>
+                  <th>วัน-เวลา</th>
+                  <th>สถานะภารกิจ</th>
+                  <th>คะแนน</th>
+                  <th>ความแม่นยำ</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <!-- สร้างโดย JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ปุ่มดำเนินการท้ายหน้า -->
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:14px;">
+          <button type="button" class="btn btn-primary" id="btn-play-again">
+            🔄 เล่นภารกิจอีกครั้ง
+          </button>
+          <button type="button" class="btn btn-outline" id="btn-back-home">
+            🏠 กลับหน้าหลัก
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- =======================================================================
+       MODAL 1: ยืนยันการซ่อมแซมไทม์ไลน์ (TIMELINE VERIFICATION QUIZ)
+       ======================================================================= -->
+  <div class="modal-backdrop" id="modal-quiz" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title">
+    <div class="glass-panel modal-card">
+      <div class="quiz-top-bar">
+        <div>
+          <span class="badge-pill purple" id="quiz-progress-badge">คำถามยืนยันระบบข้อที่ 1/2</span>
+          <h3 id="quiz-modal-title" style="font-size:1.05rem; margin-top:4px; color:var(--neon-cyan);">
+            ยืนยันการซ่อมแซมไทม์ไลน์ (Timeline Verification Quiz)
+          </h3>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="timer-value" id="quiz-timer-text">25s</span>
+          <button type="button" class="btn btn-gold" id="btn-quiz-hint" style="padding:8px 14px; min-height:38px; font-size:0.85rem;">
+            💡 AI Hint (-50)
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-track" style="margin-bottom:16px;">
+        <div class="progress-fill" id="quiz-timer-bar"></div>
+      </div>
+
+      <div class="quiz-question-text" id="quiz-question-text">
+        กำลังโหลดคำถาม...
+      </div>
+
+      <div class="quiz-options-list" id="quiz-options-container">
+        <!-- ตัวเลือก 4 ข้อสร้างโดย JS -->
+      </div>
+
+      <div class="quiz-explanation-box" id="quiz-explanation-box"></div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-primary" id="btn-quiz-next" style="display:none;">
+          ดำเนินการต่อ ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL 2: คู่มือวิธีเล่น (HOW TO PLAY MODAL)
+       ======================================================================= -->
+  <div class="modal-backdrop" id="modal-howto" role="dialog" aria-modal="true">
+    <div class="glass-panel modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="color:var(--neon-cyan); font-size:1.25rem;">📘 คู่มือปฏิบัติการกู้คืนไทม์ไลน์</h3>
+        <button type="button" class="btn btn-outline icon-btn" id="btn-close-howto">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:0.94rem; color:#E2E8F0;">
+        <div style="padding:12px; border-radius:12px; background:rgba(0,240,255,0.08); border-left:3px solid var(--neon-cyan);">
+          <strong>1. เฟสคัดแยกข้อมูลโฮโลแกรม (8 ใบ/ด่าน):</strong><br>
+          ในแต่ละยุคสมัยจะมี <strong>การ์ดเนื้อหาหลัก 6 ใบ</strong> และ <strong>การ์ดข้อมูลปนเปื้อนผิดยุค (Glitch Anomaly) 2 ใบ</strong>
+          ให้ลากวาง (Drag &amp; Drop) หรือ <strong>แตะเลือกการ์ดแล้วแตะกล่องเป้าหมาย</strong> ให้ถูกต้อง:
+          <ul style="margin-left:20px; margin-top:4px;">
+            <li><strong>ไทม์ไลน์ประจำยุค:</strong> สำหรับเหตุการณ์/บุคคล/สิ่งประดิษฐ์ที่อยู่ในยุคนั้นจริง</li>
+            <li><strong>เขตกักกันข้อมูลผิดยุค:</strong> สำหรับข้อมูลที่หลุดมาจากยุคสมัยอื่น</li>
+          </ul>
+        </div>
+
+        <div style="padding:12px; border-radius:12px; background:rgba(157,78,221,0.1); border-left:3px solid var(--cyber-purple);">
+          <strong>2. เฟสยืนยันการซ่อมแซมระบบ (Quiz ด่านละ 2 ข้อ):</strong><br>
+          เมื่อคัดแยกการ์ดครบทั้ง 8 ใบ ระบบจะเปิดคำถามวิเคราะห์เชิงประวัติศาสตร์ 2 ข้อ เพื่อยืนยันความเสถียรของไทม์ไลน์ก่อนข้ามสู่ยุคถัดไป
+        </div>
+
+        <div style="padding:12px; border-radius:12px; background:rgba(255,209,102,0.1); border-left:3px solid var(--ancient-gold);">
+          <strong>3. ระบบคะแนน เวลา ความเสถียร (HP) และ AI Hint:</strong><br>
+          • วางการ์ดถูก +100 คะแนน (+โบนัสเวลา) | ตอบ Quiz ถูก +150 คะแนน<br>
+          • วางผิด ตอบผิด หรือหมดเวลา: ความเสถียรระบบ <strong>HP ลดลง -15%</strong> พร้อมแสดงคำอธิบายทางประวัติศาสตร์ทันที<br>
+          • กดปุ่ม <strong>ขอคำใบ้ AI</strong> ได้ทุกเมื่อ (ใช้ 50 คะแนน) เพื่อให้ CHRONO-BOT วิเคราะห์บริบทช่วยตัดสินใจ<br>
+          • <strong>เงื่อนไขชนะ:</strong> ผ่านครบทั้ง 3 ด่าน โดยรักษา HP &gt; 0% และมีอัตราความแม่นยำรวม <strong>70% ขึ้นไป</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:18px; text-align:right;">
+        <button type="button" class="btn btn-primary" id="btn-close-howto-bottom">เข้าใจภารกิจแล้ว!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL 3: ยืนยันการออกจากภารกิจ (แทนการใช้ confirm() ของเบราว์เซอร์)
+       ======================================================================= -->
+  <div class="modal-backdrop" id="modal-quit" role="dialog" aria-modal="true">
+    <div class="glass-panel modal-card" style="max-width:440px; text-align:center;">
+      <h3 style="color:var(--glitch-red); font-size:1.2rem; margin-bottom:10px;">⚠️ ยืนยันการยุติภารกิจ?</h3>
+      <p style="color:var(--text-muted); font-size:0.94rem; margin-bottom:20px;">
+        หากกลับสู่หน้าหลักตอนนี้ ความคืบหน้าของไทม์ไลน์ในรอบปัจจุบันจะไม่ถูกบันทึก
+      </p>
+      <div style="display:flex; justify-content:center; gap:12px;">
+        <button type="button" class="btn btn-outline" id="btn-cancel-quit">เล่นต่อ</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-quit">กลับหน้าหลัก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- คอนเทนเนอร์ข้อความแจ้งเตือน (Toast) -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- =======================================================================
+       JAVASCRIPT ENGINE (ระบบฐานข้อมูลเกม, เสียงสังเคราะห์, AI Bot, Analytics)
+       ======================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * ส่วนที่ 1: ฐานข้อมูลเนื้อหาประวัติศาสตร์ (GAME_DATA)
+     * -------------------------------------------------------------------------
+     * คำแนะนำสำหรับครูผู้สอน:
+     * คุณครูสามารถแก้ไข ปรับปรุง หรือเพิ่มรายการการ์ดและคำถาม Quiz ได้โดยตรงในออบเจกต์
+     * GAME_DATA ด้านล่างนี้ โดยโครงสร้างแต่ละด่านประกอบด้วย:
+     * - id: รหัสด่าน (1, 2, 3)
+     * - eraName: ชื่อยุคสมัย
+     * - shortEraName: ชื่อย่อสำหรับแสดงในกราฟและป้าย
+     * - difficulty: ระดับความยาก
+     * - cardTimeLimit: เวลาต่อการ์ด (วินาที)
+     * - quizTimeLimit: เวลาต่อคำถาม Quiz (วินาที)
+     * - cards: รายการการ์ด 8 ใบ (isAnomaly: false = การ์ดหลัก 6 ใบ, true = การ์ดปนเปื้อนผิดยุค 2 ใบ)
+     * - quizzes: คำถาม Quiz ยืนยันระบบด่านละ 2 ข้อ (correctIndex: 0 ถึง 3)
+     * =========================================================================
+     */
+    const GAME_DATA = [
+      {
+        id: 1,
+        eraName: "ยุคโบราณ (Ancient Era)",
+        shortEraName: "ยุคโบราณ",
+        difficulty: "ระดับง่าย",
+        cardTimeLimit: 30,
+        quizTimeLimit: 25,
+        cards: [
+          {
+            id: "c1_1",
+            title: "มหาพีระมิดแห่งกิซา",
+            subtitle: "อียิปต์โบราณ",
+            iconType: "pyramid",
+            isAnomaly: false,
+            hint: "สิ่งก่อสร้างมหัศจรรย์ริมแม่น้ำไนล์ สร้างขึ้นเพื่อเป็นสุสานของฟาโรห์คูฟูเมื่อกว่า 4,500 ปีก่อน",
+            feedback: "มหาพีระมิดแห่งกิซาเป็นสถาปัตยกรรมสำคัญของอารยธรรมอียิปต์โบราณ อยู่ในไทม์ไลน์ยุคโบราณถูกต้องแล้ว"
+          },
+          {
+            id: "c1_2",
+            title: "ประมวลกฎหมายฮัมมูราบี",
+            subtitle: "เมโสโปเตเมีย",
+            iconType: "stele",
+            isAnomaly: false,
+            hint: "จารึกบนแท่งศิลาสีดำในอาณาจักรบาบิโลนโบราณ มีหลักลงโทษแบบตาต่อตา ฟันต่อฟัน",
+            feedback: "ประมวลกฎหมายฮัมมูราบีถือกำเนิดในเมโสโปเตเมียยุคโบราณ เป็นต้นแบบกฎหมายลายลักษณ์อักษร"
+          },
+          {
+            id: "c1_3",
+            title: "ประชาธิปไตยเอเธนส์",
+            subtitle: "กรีกโบราณ",
+            iconType: "parthenon",
+            isAnomaly: false,
+            hint: "รูปแบบการปกครองที่พลเมืองชายมีสิทธิออกเสียงโดยตรงในสภานครรัฐกรีกโบราณ",
+            feedback: "ประชาธิปไตยเอเธนส์เป็นรากฐานทางการเมืองสำคัญของอารยธรรมกรีกโบราณ"
+          },
+          {
+            id: "c1_4",
+            title: "จักรพรรดิจิ๋นซีฮ่องเต้",
+            subtitle: "รวมแผ่นดินจีน",
+            iconType: "crown_qin",
+            isAnomaly: false,
+            hint: "ปฐมจักรพรรดิแห่งราชวงศ์ฉิน ผู้ยุติยุคสงครามระหว่างแคว้นและเริ่มเชื่อมกำแพงเมืองจีน",
+            feedback: "จักรพรรดิจิ๋นซีฮ่องเต้ทรงรวบรวมแผ่นดินจีนเป็นปึกแผ่นในยุคโบราณ (221 ปีก่อน ค.ศ.)"
+          },
+          {
+            id: "c1_5",
+            title: "ไช่หลุน",
+            subtitle: "ผู้ประดิษฐ์กระดาษจากเยื่อไม้",
+            iconType: "scroll",
+            isAnomaly: false,
+            hint: "ขุนนางในสมัยราชวงศ์ฮั่นของจีน ผู้พัฒนากระบวนการผลิตกระดาษจากเปลือกไม้และเศษผ้า",
+            feedback: "ไช่หลุนประดิษฐ์กระดาษในสมัยราชวงศ์ฮั่น (ค.ศ. 105) ซึ่งจัดอยู่ในช่วงยุคโบราณของอารยธรรมจีน"
+          },
+          {
+            id: "c1_6",
+            title: "พ่อขุนรามคำแหงมหาราช",
+            subtitle: "ประดิษฐ์อักษรไทยสมัยสุโขทัย",
+            iconType: "inscription",
+            isAnomaly: false,
+            hint: "พระมหากษัตริย์แห่งอาณาจักรสุโขทัย ผู้ทรงประดิษฐ์ลายสือไทยเมื่อ พ.ศ. 1826",
+            feedback: "พ่อขุนรามคำแหงมหาราชทรงวางรากฐานอักษรไทยและจารึกหลักที่ 1 อยู่ในชุดข้อมูลด่านยุคโบราณนี้"
+          },
+          {
+            id: "c1_anom_1",
+            title: "แท่นพิมพ์กูเทนเบิร์ก",
+            subtitle: "นวัตกรรมการพิมพ์ตัวเรียงโลหะ",
+            iconType: "press",
+            isAnomaly: true,
+            hint: "สังเกตเทคโนโลยีเครื่องกลโลหะชิ้นนี้! สิ่งประดิษฐ์นี้เกิดขึ้นในยุโรปคริสต์ศตวรรษที่ 15",
+            feedback: "ข้อมูลปนเปื้อน! แท่นพิมพ์ของโยฮันเนส กูเทนเบิร์ก เกิดขึ้นราว ค.ศ. 1440 ในยุคฟื้นฟูศิลปวิทยา ไม่ใช่ยุคโบราณ"
+          },
+          {
+            id: "c1_anom_2",
+            title: "ยานอะพอลโล 11",
+            subtitle: "ภารกิจสำรวจดวงจันทร์",
+            iconType: "rocket",
+            isAnomaly: true,
+            hint: "เทคโนโลยีอวกาศยุคสงครามเย็น ค.ศ. 1969 ไม่สอดคล้องกับยุคโบราณอย่างชัดเจน!",
+            feedback: "ข้อมูลปนเปื้อน! ยานอะพอลโล 11 ส่งมนุษย์เหยียบดวงจันทร์ในปี ค.ศ. 1969 ซึ่งเป็นยุคดิจิทัล/ร่วมสมัย"
+          }
+        ],
+        quizzes: [
+          {
+            question: "กฎหมายจารึกบนแผ่นศิลาที่มีหลักการลงโทษแบบ \"ตาต่อตา ฟันต่อฟัน\" คือข้อใด?",
+            options: [
+              "ประมวลกฎหมายฮัมมูราบี",
+              "กฎหมายตราสามดวง",
+              "กฎบัตรแมกนาคาร์ตา (Magna Carta)",
+              "ประมวลกฎหมายจัสติเนียน"
+            ],
+            correctIndex: 0,
+            hint: "เป็นกฎหมายที่จารึกบนแท่งหินสีดำในอาณาจักรบาบิโลนโบราณ (เมโสโปเตเมีย)",
+            explanation: "ประมวลกฎหมายฮัมมูราบี แห่งบาบิโลนโบราณ ใช้หลักการชดเชยความผิดอย่างทัดเทียมหรือ 'ตาต่อตา ฟันต่อฟัน' เพื่อควบคุมความสงบเรียบร้อยในสังคม"
+          },
+          {
+            question: "การประดิษฐ์กระดาษของไช่หลุนและลายสือไทยของพ่อขุนรามคำแหงมหาราชส่งผลสำคัญต่อสังคมมนุษย์ในด้านใด?",
+            options: [
+              "การบันทึกองค์ความรู้และถ่ายทอดประวัติศาสตร์สู่คนรุ่นหลัง",
+              "การเริ่มต้นปฏิวัติอุตสาหกรรมและการผลิตเครื่องจักรไอน้ำ",
+              "การสำรวจเส้นทางเดินเรือข้ามมหาสมุทรแอตแลนติก",
+              "การสถาปนาระบอบประชาธิปไตยแบบรัฐสภาสมัยใหม่"
+            ],
+            correctIndex: 0,
+            hint: "ทั้งกระดาษและตัวอักษรต่างเป็นเครื่องมือพื้นฐานของการสื่อสารและการเก็บรักษาเรื่องราว",
+            explanation: "กระดาษและระบบตัวอักษรช่วยให้มนุษย์สามารถบันทึกกฎหมาย วรรณกรรม ภูมิปัญญา และหลักฐานทางประวัติศาสตร์ได้อย่างถาวรและแพร่หลาย"
+          }
+        ]
+      },
+
+      {
+        id: 2,
+        eraName: "ยุคกลางถึงยุคฟื้นฟูศิลปวิทยา (Middle Ages & Renaissance)",
+        shortEraName: "ยุคกลาง–ฟื้นฟูศิลปวิทยา",
+        difficulty: "ระดับกลาง",
+        cardTimeLimit: 25,
+        quizTimeLimit: 20,
+        cards: [
+          {
+            id: "c2_1",
+            title: "เลโอนาร์โด ดา วินชี",
+            subtitle: "ผู้วาดภาพโมนาลิซา",
+            iconType: "monalisa",
+            isAnomaly: false,
+            hint: "ศิลปินและนักวิทยาศาสตร์ชาวอิตาลี ผู้เป็นสัญลักษณ์แห่งยุคฟื้นฟูศิลปวิทยา (Renaissance)",
+            feedback: "เลโอนาร์โด ดา วินชี เป็นบุคคลสำคัญแห่งยุคเรอเนสซองส์ของอิตาลี อยู่ในไทม์ไลน์ยุคนี้อย่างถูกต้อง"
+          },
+          {
+            id: "c2_2",
+            title: "แท่นพิมพ์กูเทนเบิร์ก",
+            subtitle: "จุดเริ่มต้นการพิมพ์หนังสือในยุโรป",
+            iconType: "press",
+            isAnomaly: false,
+            hint: "นวัตกรรมที่ช่วยพิมพ์คัมภีร์และตำราวิชาการในยุโรปช่วงคริสต์ศตวรรษที่ 15",
+            feedback: "แท่นพิมพ์กูเทนเบิร์ก (ค.ศ. 1440) เป็นแรงขับเคลื่อนสำคัญของยุคฟื้นฟูศิลปวิทยาในยุโรป"
+          },
+          {
+            id: "c2_3",
+            title: "คริสโตเฟอร์ โคลัมบัส",
+            subtitle: "เดินเรือค้นพบทวีปอเมริกา",
+            iconType: "ship",
+            isAnomaly: false,
+            hint: "นักเดินเรือชาวอิตาลีภายใต้การสนับสนุนของสเปน ออกเดินทางข้ามมหาสมุทรในปี ค.ศ. 1492",
+            feedback: "โคลัมบัสเดินเรือถึงทวีปอเมริกาในปี ค.ศ. 1492 เปิดยุคแห่งการสำรวจทางทะเลของยุโรป"
+          },
+          {
+            id: "c2_4",
+            title: "กาลิเลโอ กาลิเลอี",
+            subtitle: "ใช้กล้องโทรทรรศน์สำรวจดาราศาสตร์",
+            iconType: "telescope",
+            isAnomaly: false,
+            hint: "นักดาราศาสตร์ชาวอิตาลีในยุคฟื้นฟูศิลปวิทยาและปฏิวัติวิทยาศาสตร์ตอนต้น ผู้ส่องดูดวงจันทร์ของดาวพฤหัสบดี",
+            feedback: "กาลิเลโอ (ค.ศ. 1564–1642) ใช้กล้องโทรทรรศน์พิสูจน์ทฤษฎีดาราศาสตร์สมัยใหม่ในยุคเรอเนสซองส์ตอนปลาย"
+          },
+          {
+            id: "c2_5",
+            title: "สมเด็จพระนารายณ์มหาราช",
+            subtitle: "ยุคทองการทูตอยุธยากับฝรั่งเศส",
+            iconType: "diplomacy",
+            isAnomaly: false,
+            hint: "พระมหากษัตริย์กรุงศรีอยุธยา (คริสต์ศตวรรษที่ 17) ที่ทรงส่งคณะราชทูตโกษาปานไปเข้าเฝ้าพระเจ้าหลุยส์ที่ 14",
+            feedback: "รัชสมัยสมเด็จพระนารายณ์มหาราชตรงกับยุคการค้าทางทะเลและการทูตระหว่างอยุธยากับชาติตะวันตก"
+          },
+          {
+            id: "c2_6",
+            title: "ทัชมาฮาล",
+            subtitle: "สถาปัตยกรรมจักรวรรดิโมกุล",
+            iconType: "tajmahal",
+            isAnomaly: false,
+            hint: "สุสานหินอ่อนสีขาวในเมืองอัครา ประเทศอินเดีย สร้างขึ้นในคริสต์ศตวรรษที่ 17 สมัยจักรวรรดิโมกุล",
+            feedback: "ทัชมาฮาลสร้างขึ้นระหว่าง ค.ศ. 1632–1653 เป็นสุดยอดศิลปกรรมแห่งจักรวรรดิโมกุลร่วมสมัยกับยุคฟื้นฟูฯ-ตอนต้นสมัยใหม่"
+          },
+          {
+            id: "c2_anom_1",
+            title: "ประชาธิปไตยเอเธนส์",
+            subtitle: "การปกครองนครรัฐกรีก",
+            iconType: "parthenon",
+            isAnomaly: true,
+            hint: "ระบอบการปกครองนี้รุ่งเรืองเมื่อราว 500 ปีก่อนคริสตกาล อยู่ในยุคโบราณ!",
+            feedback: "ข้อมูลปนเปื้อน! ประชาธิปไตยเอเธนส์เป็นเหตุการณ์ในยุคโบราณของกรีก ไม่ใช่ยุคกลางหรือเรอเนสซองส์"
+          },
+          {
+            id: "c2_anom_2",
+            title: "พี่น้องตระกูลไรต์",
+            subtitle: "ประดิษฐ์เครื่องบินลำแรก",
+            iconType: "airplane",
+            isAnomaly: true,
+            hint: "การบินด้วยเครื่องยนต์เกิดขึ้นในปี ค.ศ. 1903 ล้ำหน้ากว่ายุคฟื้นฟูศิลปวิทยาไปหลายร้อยปี!",
+            feedback: "ข้อมูลปนเปื้อน! พี่น้องตระกูลไรต์ประดิษฐ์เครื่องบินสำเร็จในปี ค.ศ. 1903 ซึ่งอยู่ในยุคสมัยใหม่"
+          }
+        ],
+        quizzes: [
+          {
+            question: "สิ่งประดิษฐ์ใดในยุคฟื้นฟูศิลปวิทยาที่ทำให้หนังสือและความรู้แพร่กระจายไปทั่วยุโรปอย่างรวดเร็ว?",
+            options: [
+              "แท่นพิมพ์ของโยฮันเนส กูเทนเบิร์ก",
+              "เครื่องจักรไอน้ำของเจมส์ วัตต์",
+              "กระดาษจากเยื่อไม้ของไช่หลุน",
+              "ระบบเครือข่าย World Wide Web"
+            ],
+            correctIndex: 0,
+            hint: "นวัตกรรมตัวเรียงพิมพ์โลหะที่เกิดขึ้นในเยอรมนีช่วงปี ค.ศ. 1440",
+            explanation: "แท่นพิมพ์ของโยฮันเนส กูเทนเบิร์ก ลดต้นทุนและเวลาในการคัดลอกหนังสือ ทำให้แนวคิดมนุษยนิยมและวิทยาศาสตร์แพร่กระจายอย่างรวดเร็ว"
+          },
+          {
+            question: "การค้นพบทวีปอเมริกาของโคลัมบัสและการทูตสมัยสมเด็จพระนารายณ์มหาราชสะท้อนบริบทใด?",
+            options: [
+              "ยุคแห่งการสำรวจทางทะเลและการเชื่อมโยงการค้า-การทูตระหว่างตะวันตกกับตะวันออก",
+              "ยุคสงครามเย็นและการแข่งขันด้านเทคโนโลยีอวกาศ",
+              "ยุคเริ่มต้นการตั้งถิ่นฐานของมนุษย์ยุคหินใหม่",
+              "ยุคปฏิวัติเกษตรกรรมและการสร้างพีระมิด"
+            ],
+            correctIndex: 0,
+            hint: "พิจารณาการเดินทางข้ามมหาสมุทรและการติดต่อแลกเปลี่ยนระหว่างทวีปในคริสต์ศตวรรษที่ 15–17",
+            explanation: "ทั้งสองเหตุการณ์สะท้อนยุคแห่งการเดินเรือสำรวจและเครือข่ายการค้าโลก ที่เชื่อมโยงยุโรป อเมริกา และเอเชียเข้าด้วยกัน"
+          }
+        ]
+      },
+
+      {
+        id: 3,
+        eraName: "ยุคปฏิวัติอุตสาหกรรมถึงยุคดิจิทัล (Modern & Contemporary Era)",
+        shortEraName: "ยุคอุตสาหกรรม–ดิจิทัล",
+        difficulty: "ระดับยาก",
+        cardTimeLimit: 20,
+        quizTimeLimit: 15,
+        cards: [
+          {
+            id: "c3_1",
+            title: "เจมส์ วัตต์",
+            subtitle: "พัฒนาเครื่องจักรไอน้ำ",
+            iconType: "steam",
+            isAnomaly: false,
+            hint: "วิศวกรชาวสกอตแลนด์ผู้ปรับปรุงเครื่องจักรไอน้ำให้มีประสิทธิภาพสูงในคริสต์ศตวรรษที่ 18 จุดชนวนการปฏิวัติอุตสาหกรรม",
+            feedback: "เจมส์ วัตต์ พัฒนาเครื่องจักรไอน้ำในปี ค.ศ. 1769 เป็นจุดเริ่มต้นสำคัญของยุคอุตสาหกรรมสมัยใหม่"
+          },
+          {
+            id: "c3_2",
+            title: "พี่น้องตระกูลไรต์",
+            subtitle: "ประดิษฐ์เครื่องบินลำแรกที่บินได้สำเร็จ",
+            iconType: "airplane",
+            isAnomaly: false,
+            hint: "ออร์วิลล์และวิลเบอร์ ไรต์ ทดลองบินเครื่องบินติดเครื่องยนต์สำเร็จที่คิตตีฮอว์ก ค.ศ. 1903",
+            feedback: "พี่น้องตระกูลไรต์เปิดศักราชการคมนาคมทางอากาศในต้นคริสต์ศตวรรษที่ 20"
+          },
+          {
+            id: "c3_3",
+            title: "รัชกาลที่ 5",
+            subtitle: "ประกาศเลิกทาสและปฏิรูประบบราชการไทย",
+            iconType: "rama5",
+            isAnomaly: false,
+            hint: "พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว ทรงปฏิรูปสยามให้ทันสมัยเพื่อรับมือกระแสจักรวรรดินิยมตะวันตก",
+            feedback: "การปฏิรูปประเทศในสมัยรัชกาลที่ 5 (พ.ศ. 2411–2453) เป็นจุดเปลี่ยนสำคัญของประวัติศาสตร์ไทยสมัยใหม่"
+          },
+          {
+            id: "c3_4",
+            title: "ยานอะพอลโล 11",
+            subtitle: "มนุษย์เหยียบดวงจันทร์ครั้งแรก ค.ศ. 1969",
+            iconType: "rocket",
+            isAnomaly: false,
+            hint: "ภารกิจขององค์การ NASA ที่มีนีล อาร์มสตรอง เป็นมนุษย์คนแรกที่ก้าวเท้าลงบนดวงจันทร์",
+            feedback: "ยานอะพอลโล 11 ในปี ค.ศ. 1969 เป็นหมุดหมายสำคัญของยุคอวกาศและประวัติศาสตร์ร่วมสมัย"
+          },
+          {
+            id: "c3_5",
+            title: "ทิม เบอร์เนอร์ส-ลี",
+            subtitle: "ผู้คิดค้น World Wide Web",
+            iconType: "www",
+            isAnomaly: false,
+            hint: "นักวิทยาการคอมพิวเตอร์ชาวอังกฤษ ผู้พัฒนา HTTP, HTML และเบราว์เซอร์แรกในปี ค.ศ. 1989",
+            feedback: "ทิม เบอร์เนอร์ส-ลี วางรากฐานอินเทอร์เน็ตสมัยใหม่ นำพามนุษยชาติเข้าสู่ยุคสารสนเทศและดิจิทัล"
+          },
+          {
+            id: "c3_6",
+            title: "ยุคสมาร์ตโฟนและปัญญาประดิษฐ์",
+            subtitle: "ศตวรรษที่ 21",
+            iconType: "ai_chip",
+            isAnomaly: false,
+            hint: "เทคโนโลยีดิจิทัลปัจจุบันที่ผสานการสื่อสารพกพา อินเทอร์เน็ตความเร็วสูง และ AI เข้าด้วยกัน",
+            feedback: "ยุคสมาร์ตโฟนและปัญญาประดิษฐ์คือบริบทปัจจุบันของศตวรรษที่ 21 ในไทม์ไลน์ยุคดิจิทัล"
+          },
+          {
+            id: "c3_anom_1",
+            title: "ประมวลกฎหมายฮัมมูราบี",
+            subtitle: "ศิลาจารึกกฎหมายเมโสโปเตเมีย",
+            iconType: "stele",
+            isAnomaly: true,
+            hint: "กฎหมายโบราณอายุกว่า 3,700 ปี ไม่ได้อยู่ในยุคอุตสาหกรรมหรือยุคดิจิทัลแน่นอน!",
+            feedback: "ข้อมูลปนเปื้อน! ประมวลกฎหมายฮัมมูราบีเป็นมรดกของยุคโบราณ ต้องถูกกักกันทันที"
+          },
+          {
+            id: "c3_anom_2",
+            title: "เลโอนาร์โด ดา วินชี",
+            subtitle: "จิตรกรเอกผู้วาดภาพโมนาลิซา",
+            iconType: "monalisa",
+            isAnomaly: true,
+            hint: "ศิลปินท่านนี้มีชีวิตอยู่ในช่วง ค.ศ. 1452–1519 ซึ่งเป็นยุคฟื้นฟูศิลปวิทยา!",
+            feedback: "ข้อมูลปนเปื้อน! เลโอนาร์โด ดา วินชี เป็นบุคคลสำคัญแห่งยุคฟื้นฟูศิลปวิทยา ไม่ใช่ยุคสมัยใหม่"
+          }
+        ],
+        quizzes: [
+          {
+            question: "เหตุการณ์ใดเกิดขึ้นเป็นลำดับแรกสุดในยุคสมัยใหม่?",
+            options: [
+              "การพัฒนาเครื่องจักรไอน้ำของเจมส์ วัตต์",
+              "การส่งยานอะพอลโล 11 ไปดวงจันทร์",
+              "การคิดค้น World Wide Web ของทิม เบอร์เนอร์ส-ลี",
+              "การบินสำเร็จของพี่น้องตระกูลไรต์"
+            ],
+            correctIndex: 0,
+            hint: "เรียงลำดับปี ค.ศ.: 1769 (เครื่องจักรไอน้ำ) -> 1903 (เครื่องบิน) -> 1969 (ดวงจันทร์) -> 1989 (WWW)",
+            explanation: "เจมส์ วัตต์ พัฒนาเครื่องจักรไอน้ำในปี ค.ศ. 1769 ซึ่งเป็นจุดเริ่มต้นของการปฏิวัติอุตสาหกรรม ก่อนการบิน (1903) อะพอลโล 11 (1969) และ WWW (1989)"
+          },
+          {
+            question: "การปฏิรูปประเทศในสมัยรัชกาลที่ 5 สอดคล้องกับกระแสการเปลี่ยนแปลงของโลกในยุคใด?",
+            options: [
+              "การปฏิวัติอุตสาหกรรมและการล่าอาณานิคมของชาติตะวันตก",
+              "ยุคฟื้นฟูศิลปวิทยาและการปฏิรูปศาสนา",
+              "ยุคสงครามครูเสดและระบบศักดินาสวามิภักดิ์",
+              "ยุคอาณาจักรเมโสโปเตเมียและอียิปต์โบราณ"
+            ],
+            correctIndex: 0,
+            hint: "ชาติตะวันตกขยายอิทธิพลเข้ามาในเอเชียตะวันออกเฉียงใต้เพื่อแสวงหาวัตถุดิบและตลาดการค้า",
+            explanation: "การปฏิวัติอุตสาหกรรมทำให้ชาติตะวันตกมีแสนยานุภาพและออกล่าอาณานิคม รัชกาลที่ 5 จึงทรงปฏิรูปการปกครอง เศรษฐกิจ และสังคมเพื่อรักษาเอกราชของสยาม"
+          }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 2: คลังไอคอน SVG เวกเตอร์เฉพาะแต่ละการ์ดและตัวละคร CHRONO-BOT
+     * =========================================================================
+     */
+    const SVG_LIBRARY = {
+      // ตัวละครผู้ช่วย AI "CHRONO-BOT (น้องไทม์)" แสดงอารมณ์ตามสถานะ
+      getChronoBot(mood = "normal", isLarge = false) {
+        let visorContent = "";
+        let accentColor = "#00F0FF";
+
+        if (mood === "thinking") {
+          accentColor = "#FFD166";
+          visorContent = `
+            <circle cx="38" cy="44" r="5" fill="none" stroke="#FFD166" stroke-width="2.2" stroke-dasharray="6 3"/>
+            <circle cx="62" cy="44" r="5" fill="none" stroke="#FFD166" stroke-width="2.2" stroke-dasharray="6 3"/>
+            <path d="M43 55 Q50 52 57 55" stroke="#FFD166" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          `;
+        } else if (mood === "glitch") {
+          accentColor = "#FF2A6D";
+          visorContent = `
+            <path d="M33 40 L42 46 L33 50" stroke="#FF2A6D" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <path d="M67 40 L58 46 L67 50" stroke="#FF2A6D" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <path d="M41 57 L46 53 L50 57 L54 53 L59 57" stroke="#FF2A6D" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          `;
+        } else if (mood === "celebrate") {
+          accentColor = "#06D6A0";
+          visorContent = `
+            <path d="M32 46 Q38 37 44 46" stroke="#06D6A0" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M56 46 Q62 37 68 46" stroke="#06D6A0" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M40 52 Q50 63 60 52 Z" fill="#06D6A0"/>
+          `;
+        } else {
+          // normal
+          accentColor = "#00F0FF";
+          visorContent = `
+            <circle cx="38" cy="44" r="4.5" fill="#00F0FF"/>
+            <circle cx="62" cy="44" r="4.5" fill="#00F0FF"/>
+            <circle cx="39.5" cy="42.5" r="1.5" fill="#FFFFFF"/>
+            <circle cx="63.5" cy="42.5" r="1.5" fill="#FFFFFF"/>
+            <path d="M42 53 Q50 60 58 53" stroke="#00F0FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          `;
+        }
+
+        return `
+          <svg class="chrono-bot-avatar ${isLarge ? 'large' : ''}" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="botBodyGrad_${mood}" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1E293B"/>
+                <stop offset="100%" stop-color="#0F172A"/>
+              </linearGradient>
+            </defs>
+            <!-- วงแหวนพลังงานด้านหลัง -->
+            <ellipse cx="50" cy="50" rx="44" ry="18" fill="none" stroke="${accentColor}" stroke-width="1.4" opacity="0.45" transform="rotate(-18 50 50)"/>
+            <!-- เสาอากาศไซไฟ -->
+            <line x1="50" y1="10" x2="50" y2="22" stroke="${accentColor}" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="8" r="4.5" fill="${accentColor}"/>
+            <!-- หูฟังข้างศีรษะ -->
+            <rect x="14" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"/>
+            <rect x="79" y="38" width="7" height="22" rx="3.5" fill="#9D4EDD"/>
+            <!-- ส่วนหัวหุ่นยนต์ -->
+            <rect x="20" y="22" width="60" height="48" rx="18" fill="url(#botBodyGrad_${mood})" stroke="${accentColor}" stroke-width="2.5"/>
+            <!-- หน้าจอแสดงอารมณ์ -->
+            <rect x="26" y="30" width="48" height="32" rx="11" fill="#060B19" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+            ${visorContent}
+            <!-- ลำตัวลอยและไอพ่นด้านล่าง -->
+            <path d="M36 73 L64 73 L58 86 L42 86 Z" fill="#1E293B" stroke="${accentColor}" stroke-width="1.8"/>
+            <ellipse cx="50" cy="91" rx="11" ry="3.5" fill="${accentColor}" opacity="0.75"/>
+          </svg>
+        `;
+      },
+
+      // ไอคอนเวกเตอร์ประจำการ์ดประวัติศาสตร์ทั้ง 18 รูปแบบ
+      getCardIcon(type) {
+        const icons = {
+          pyramid: `<svg viewBox="0 0 36 36" fill="none"><polygon points="18,5 32,29 4,29" fill="#FFD166" fill-opacity="0.25" stroke="#FFD166" stroke-width="2"/><line x1="18" y1="5" x2="22" y2="29" stroke="#FFD166" stroke-width="1.5"/><circle cx="27" cy="9" r="3" fill="#FF9F1C"/></svg>`,
+          stele: `<svg viewBox="0 0 36 36" fill="none"><path d="M11 31 V12 A7 7 0 0 1 25 12 V31 Z" fill="#00F0FF" fill-opacity="0.2" stroke="#00F0FF" stroke-width="2"/><line x1="14" y1="15" x2="22" y2="15" stroke="#FFD166" stroke-width="1.6"/><line x1="14" y1="20" x2="22" y2="20" stroke="#FFD166" stroke-width="1.6"/><line x1="14" y1="25" x2="20" y2="25" stroke="#FFD166" stroke-width="1.6"/></svg>`,
+          parthenon: `<svg viewBox="0 0 36 36" fill="none"><polygon points="18,5 31,12 5,12" fill="#00F0FF" fill-opacity="0.25" stroke="#00F0FF" stroke-width="2"/><line x1="9" y1="12" x2="9" y2="27" stroke="#E2E8F0" stroke-width="2.2"/><line x1="15" y1="12" x2="15" y2="27" stroke="#E2E8F0" stroke-width="2.2"/><line x1="21" y1="12" x2="21" y2="27" stroke="#E2E8F0" stroke-width="2.2"/><line x1="27" y1="12" x2="27" y2="27" stroke="#E2E8F0" stroke-width="2.2"/><rect x="5" y="27" width="26" height="4" fill="#FFD166"/></svg>`,
+          crown_qin: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="10" width="24" height="4" rx="1" fill="#FFD166"/><path d="M10 14 L12 25 H24 L26 14" fill="#9D4EDD" fill-opacity="0.35" stroke="#FFD166" stroke-width="1.8"/><line x1="9" y1="14" x2="9" y2="21" stroke="#00F0FF" stroke-width="1.5"/><line x1="18" y1="14" x2="18" y2="22" stroke="#00F0FF" stroke-width="1.5"/><line x1="27" y1="14" x2="27" y2="21" stroke="#00F0FF" stroke-width="1.5"/></svg>`,
+          scroll: `<svg viewBox="0 0 36 36" fill="none"><rect x="9" y="7" width="18" height="22" rx="3" fill="#FFD166" fill-opacity="0.22" stroke="#FFD166" stroke-width="2"/><line x1="13" y1="13" x2="23" y2="13" stroke="#00F0FF" stroke-width="1.8"/><line x1="13" y1="18" x2="23" y2="18" stroke="#00F0FF" stroke-width="1.8"/><line x1="13" y1="23" x2="19" y2="23" stroke="#00F0FF" stroke-width="1.8"/></svg>`,
+          inscription: `<svg viewBox="0 0 36 36" fill="none"><rect x="10" y="6" width="16" height="24" rx="4" fill="#06D6A0" fill-opacity="0.2" stroke="#06D6A0" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="#FFD166" font-size="13" font-weight="bold">ก</text></svg>`,
+          monalisa: `<svg viewBox="0 0 36 36" fill="none"><rect x="8" y="5" width="20" height="26" rx="2" fill="#9D4EDD" fill-opacity="0.25" stroke="#FFD166" stroke-width="2"/><circle cx="18" cy="15" r="4" fill="#FFD166"/><path d="M12 27 C12 21 24 21 24 27" fill="#00F0FF" fill-opacity="0.5"/></svg>`,
+          press: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="24" width="22" height="5" rx="1" fill="#00F0FF"/><line x1="18" y1="8" x2="18" y2="24" stroke="#FFD166" stroke-width="3"/><line x1="11" y1="12" x2="25" y2="12" stroke="#FFD166" stroke-width="2.5"/><rect x="11" y="18" width="14" height="4" fill="#9D4EDD"/></svg>`,
+          ship: `<svg viewBox="0 0 36 36" fill="none"><path d="M6 23 H30 L26 29 H10 Z" fill="#FFD166" fill-opacity="0.3" stroke="#FFD166" stroke-width="2"/><polygon points="18,6 27,20 18,20" fill="#00F0FF" fill-opacity="0.4" stroke="#00F0FF" stroke-width="1.6"/><polygon points="16,9 9,20 16,20" fill="#9D4EDD" fill-opacity="0.4" stroke="#9D4EDD" stroke-width="1.6"/></svg>`,
+          telescope: `<svg viewBox="0 0 36 36" fill="none"><line x1="8" y1="22" x2="27" y2="10" stroke="#00F0FF" stroke-width="4.5" stroke-linecap="round"/><line x1="18" y1="16" x2="13" y2="30" stroke="#FFD166" stroke-width="2"/><line x1="18" y1="16" x2="23" y2="30" stroke="#FFD166" stroke-width="2"/><circle cx="29" cy="8" r="2.5" fill="#FFD166"/></svg>`,
+          diplomacy: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="14" r="5" fill="#FFD166" fill-opacity="0.3" stroke="#FFD166" stroke-width="2"/><circle cx="23" cy="14" r="5" fill="#00F0FF" fill-opacity="0.3" stroke="#00F0FF" stroke-width="2"/><path d="M8 27 C10 21 26 21 28 27" stroke="#06D6A0" stroke-width="2.2" fill="none"/></svg>`,
+          tajmahal: `<svg viewBox="0 0 36 36" fill="none"><path d="M12 18 C12 11 18 7 18 7 C18 7 24 11 24 18 Z" fill="#FFFFFF" fill-opacity="0.25" stroke="#00F0FF" stroke-width="2"/><rect x="10" y="18" width="16" height="11" fill="#9D4EDD" fill-opacity="0.25" stroke="#FFD166" stroke-width="1.8"/><line x1="6" y1="13" x2="6" y2="29" stroke="#E2E8F0" stroke-width="2"/><line x1="30" y1="13" x2="30" y2="29" stroke="#E2E8F0" stroke-width="2"/></svg>`,
+          steam: `<svg viewBox="0 0 36 36" fill="none"><circle cx="15" cy="21" r="7" fill="none" stroke="#FFD166" stroke-width="2.5"/><circle cx="25" cy="14" r="4.5" fill="none" stroke="#00F0FF" stroke-width="2.2"/><path d="M8 12 Q11 7 15 10" stroke="#E2E8F0" stroke-width="1.8" fill="none"/></svg>`,
+          airplane: `<svg viewBox="0 0 36 36" fill="none"><path d="M4 19 L32 13 L22 21 L25 27 L18 22 L11 25 L14 20 Z" fill="#00F0FF" fill-opacity="0.3" stroke="#00F0FF" stroke-width="2" stroke-linejoin="round"/></svg>`,
+          rama5: `<svg viewBox="0 0 36 36" fill="none"><polygon points="18,5 23,14 31,14 24,20 27,29 18,23 9,29 12,20 5,14 13,14" fill="#FFD166" fill-opacity="0.28" stroke="#FFD166" stroke-width="2"/></svg>`,
+          rocket: `<svg viewBox="0 0 36 36" fill="none"><path d="M18 5 C23 10 24 18 22 25 H14 C12 18 13 10 18 5 Z" fill="#FF2A6D" fill-opacity="0.3" stroke="#00F0FF" stroke-width="2"/><circle cx="18" cy="15" r="2.5" fill="#FFD166"/><path d="M15 26 L18 32 L21 26" fill="#FFD166"/></svg>`,
+          www: `<svg viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="11" stroke="#00F0FF" stroke-width="2"/><ellipse cx="18" cy="18" rx="5" ry="11" stroke="#9D4EDD" stroke-width="1.6"/><line x1="7" y1="18" x2="29" y2="18" stroke="#FFD166" stroke-width="1.6"/></svg>`,
+          ai_chip: `<svg viewBox="0 0 36 36" fill="none"><rect x="10" y="10" width="16" height="16" rx="3" fill="#9D4EDD" fill-opacity="0.35" stroke="#00F0FF" stroke-width="2"/><text x="18" y="21" text-anchor="middle" fill="#FFD166" font-size="9" font-weight="bold">AI</text><line x1="14" y1="6" x2="14" y2="10" stroke="#00F0FF" stroke-width="2"/><line x1="22" y1="6" x2="22" y2="10" stroke="#00F0FF" stroke-width="2"/><line x1="14" y1="26" x2="14" y2="30" stroke="#00F0FF" stroke-width="2"/><line x1="22" y1="26" x2="22" y2="30" stroke="#00F0FF" stroke-width="2"/></svg>`
+        };
+        return icons[type] || icons.www;
+      }
+    };
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 3: ระบบเสียงสังเคราะห์ไซไฟ (WEB AUDIO API SOUND ENGINE)
+     * -------------------------------------------------------------------------
+     * ทำงานได้ 100% แบบ Offline ไม่ต้องโหลดไฟล์เสียง MP3 ภายนอก
+     * =========================================================================
+     */
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      }
+
+      toggle() {
+        this.enabled = !this.enabled;
+        if (this.enabled) {
+          this.initContext();
+          this.playSelect();
+        }
+        return this.enabled;
+      }
+
+      // เสียงคลิก/เลือกการ์ด
+      playSelect() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(580, now);
+        osc.frequency.exponentialRampToValueAtTime(920, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      }
+
+      // เสียงวางการ์ดถูก / ตอบคำถามถูก
+      playSuccess() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const now = this.ctx.currentTime + idx * 0.065;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.24);
+        });
+      }
+
+      // เสียง Glitch ผิดพลาด / หมดเวลา
+      playError() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc1.type = "sawtooth";
+        osc2.type = "square";
+        osc1.frequency.setValueAtTime(190, now);
+        osc1.frequency.linearRampToValueAtTime(75, now + 0.32);
+        osc2.frequency.setValueAtTime(145, now);
+        osc2.frequency.linearRampToValueAtTime(55, now + 0.32);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.34);
+        osc2.stop(now + 0.34);
+      }
+
+      // เสียง AI Hint สแกนวิเคราะห์
+      playHint() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(1260, now + 0.16);
+        osc.frequency.exponentialRampToValueAtTime(840, now + 0.32);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.34);
+      }
+
+      // เสียงชนะด่าน / ชนะทั้งเกม
+      playVictory() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const fanfare = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+        const times = [0, 0.1, 0.2, 0.3, 0.45, 0.58];
+        fanfare.forEach((freq, i) => {
+          const now = this.ctx.currentTime + times[i];
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.17, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.36);
+        });
+      }
+
+      // เสียงเตือนนับถอยหลังใกล้หมดเวลา
+      playTick() {
+        if (!this.enabled) return;
+        this.initContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 4: แอนิเมชันดาวระยิบระยับบนพื้นหลังอวกาศ (STARFIELD CANVAS)
+     * =========================================================================
+     */
+    function initStarfield() {
+      const canvas = document.getElementById("starfield-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let stars = [];
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const count = Math.min(130, Math.floor((canvas.width * canvas.height) / 11000));
+        stars = Array.from({ length: count }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.7 + 0.4,
+          alpha: Math.random(),
+          delta: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1),
+          speedY: Math.random() * 0.18 + 0.04
+        }));
+      }
+
+      function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha += s.delta;
+          if (s.alpha <= 0.15 || s.alpha >= 0.95) s.delta *= -1;
+          s.y -= s.speedY;
+          if (s.y < 0) {
+            s.y = canvas.height;
+            s.x = Math.random() * canvas.width;
+          }
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(224, 242, 254, ${s.alpha})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(animateStars);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      animateStars();
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 5: ตัวจัดการเกมหลักและระบบวิเคราะห์การเรียนรู้ (GAME CONTROLLER)
+     * =========================================================================
+     */
+    const STORAGE_KEY = "history_glitch_analytics_v1";
+    const sound = new SoundEngine();
+
+    // สถานะทั้งหมดของเกมในรอบปัจจุบัน
+    const gameState = {
+      currentStageIndex: 0,
+      score: 0,
+      coins: 0,
+      hp: 100,
+      phase: "cards", // "cards" หรือ "quiz"
+      remainingCards: [],
+      placedEraCards: [],
+      placedQuarantineCards: [],
+      selectedCardId: null,
+      hintedCardId: null,
+      currentQuizIndex: 0,
+      quizAnswered: false,
+      quizHintUsed: false,
+      // ตัวจับเวลา
+      timerInterval: null,
+      timeLeft: 30,
+      timeLimit: 30,
+      lastTickSecond: -1,
+      // สถิติการเรียนรู้รายบุคคลในรอบปัจจุบัน
+      analytics: {
+        totalAttempts: 0,
+        correctAttempts: 0,
+        anomaliesCaughtCleanly: 0,
+        missedAnomalies: 0,
+        eraStats: {
+          1: { correct: 0, total: 0 },
+          2: { correct: 0, total: 0 },
+          3: { correct: 0, total: 0 }
+        },
+        mistakesLog: [] // เก็บหัวข้อที่ผู้เรียนตอบผิดหรือหมดเวลาเพื่อสร้างข้อเสนอแนะ
+      }
+    };
+
+    // ฟังก์ชันสลับหน้าจอ
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach((el) => el.classList.remove("active"));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // ฟังก์ชันแสดงข้อความ Toast แจ้งเตือน
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast-msg ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(8px)";
+        toast.style.transition = "all 0.25s ease";
+        setTimeout(() => toast.remove(), 260);
+      }, 2800);
+    }
+
+    // อัปเดตอารมณ์และคำพูดของ CHRONO-BOT
+    function updateChronoBot(mood, message, moodText) {
+      const gameMount = document.getElementById("game-bot-mount");
+      if (gameMount) {
+        gameMount.innerHTML = SVG_LIBRARY.getChronoBot(mood, false);
+      }
+      const msgEl = document.getElementById("bot-message");
+      if (msgEl && message) {
+        msgEl.textContent = message;
+      }
+      const moodEl = document.getElementById("bot-mood-label");
+      if (moodEl && moodText) {
+        moodEl.textContent = `[สถานะ: ${moodText}]`;
+      }
+    }
+
+    // เอฟเฟกต์สั่นหน้าจอเมื่อเกิด Glitch
+    function triggerGlitchShake() {
+      const root = document.getElementById("app-root");
+      root.classList.remove("shake-active");
+      void root.offsetWidth; // บังคับ Reflow
+      root.classList.add("shake-active");
+    }
+
+    // อัปเดตแถบ HUD ด้านบน
+    function updateHUD() {
+      const stage = GAME_DATA[gameState.currentStageIndex];
+      document.getElementById("hud-stage-num").textContent = `ด่านที่ ${stage.id}/3`;
+      document.getElementById("hud-difficulty").textContent = stage.difficulty;
+      document.getElementById("hud-stage-name").textContent = stage.eraName;
+      document.getElementById("hud-phase-label").textContent =
+        gameState.phase === "cards" ? "เฟส 1: คัดแยกไทม์ไลน์" : "เฟส 2: ยืนยันระบบ Quiz";
+
+      document.getElementById("hud-score").textContent = gameState.score.toLocaleString();
+      document.getElementById("hud-coins").textContent = gameState.coins.toLocaleString();
+      document.getElementById("hud-hp-text").textContent = `${Math.max(0, gameState.hp)}%`;
+
+      const hpBar = document.getElementById("hud-hp-bar");
+      hpBar.style.width = `${Math.max(0, gameState.hp)}%`;
+      if (gameState.hp <= 35) {
+        hpBar.classList.add("hp-low");
+      } else {
+        hpBar.classList.remove("hp-low");
+      }
+    }
+
+    // ระบบจับเวลานับถอยหลังต่อรายการ
+    function startActionTimer(seconds, onTimeoutCallback) {
+      stopActionTimer();
+      gameState.timeLimit = seconds;
+      gameState.timeLeft = seconds;
+      gameState.lastTickSecond = Math.ceil(seconds);
+      renderTimerUI();
+
+      const stepMs = 100;
+      gameState.timerInterval = setInterval(() => {
+        gameState.timeLeft = Math.max(0, +(gameState.timeLeft - stepMs / 1000).toFixed(1));
+        renderTimerUI();
+
+        const wholeSec = Math.ceil(gameState.timeLeft);
+        if (wholeSec <= 5 && wholeSec > 0 && wholeSec !== gameState.lastTickSecond) {
+          gameState.lastTickSecond = wholeSec;
+          sound.playTick();
+        }
+
+        if (gameState.timeLeft <= 0) {
+          stopActionTimer();
+          onTimeoutCallback();
+        }
+      }, stepMs);
+    }
+
+    function stopActionTimer() {
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+      }
+    }
+
+    function renderTimerUI() {
+      const ratio = Math.max(0, (gameState.timeLeft / gameState.timeLimit) * 100);
+      const valText = `${gameState.timeLeft.toFixed(1)}s`;
+
+      if (gameState.phase === "cards") {
+        const textEl = document.getElementById("hud-timer-text");
+        const barEl = document.getElementById("hud-timer-bar");
+        textEl.textContent = valText;
+        barEl.style.width = `${ratio}%`;
+        textEl.className = "timer-value" + (ratio <= 25 ? " danger" : ratio <= 50 ? " warning" : "");
+      } else {
+        const qTextEl = document.getElementById("quiz-timer-text");
+        const qBarEl = document.getElementById("quiz-timer-bar");
+        qTextEl.textContent = `${Math.ceil(gameState.timeLeft)}s`;
+        qBarEl.style.width = `${ratio}%`;
+        qTextEl.className = "timer-value" + (ratio <= 25 ? " danger" : ratio <= 50 ? " warning" : "");
+      }
+    }
+
+    // เริ่มเกมใหม่ตั้งแต่ด่านที่ 1
+    function startNewGame() {
+      sound.playSelect();
+      gameState.currentStageIndex = 0;
+      gameState.score = 0;
+      gameState.coins = 0;
+      gameState.hp = 100;
+      gameState.analytics = {
+        totalAttempts: 0,
+        correctAttempts: 0,
+        anomaliesCaughtCleanly: 0,
+        missedAnomalies: 0,
+        eraStats: {
+          1: { correct: 0, total: 0 },
+          2: { correct: 0, total: 0 },
+          3: { correct: 0, total: 0 }
+        },
+        mistakesLog: []
+      };
+
+      showScreen("screen-game");
+      loadStage(0);
+    }
+
+    // โหลดข้อมูลด่านที่กำหนด
+    function loadStage(stageIdx) {
+      gameState.currentStageIndex = stageIdx;
+      const stage = GAME_DATA[stageIdx];
+      gameState.phase = "cards";
+      gameState.selectedCardId = null;
+      gameState.hintedCardId = null;
+      gameState.placedEraCards = [];
+      gameState.placedQuarantineCards = [];
+
+      // สุ่มลำดับการ์ดทั้ง 8 ใบ (Fisher-Yates Shuffle)
+      const clonedCards = stage.cards.map((c) => ({ ...c, hadError: false }));
+      for (let i = clonedCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clonedCards[i], clonedCards[j]] = [clonedCards[j], clonedCards[i]];
+      }
+      gameState.remainingCards = clonedCards;
+
+      // รีเซ็ต UI ของด่าน
+      document.getElementById("zone-era-title").textContent = `ไทม์ไลน์: ${stage.shortEraName}`;
+      document.getElementById("instant-feedback-box").classList.remove("visible");
+      document.getElementById("modal-quiz").classList.remove("active");
+
+      updateHUD();
+      updateChronoBot(
+        "normal",
+        `เข้าสู่ด่านที่ ${stage.id}: ${stage.eraName} แล้ว! มีการ์ดข้อมูล 6 ใบ และข้อมูลผิดยุคปะปนมา 2 ใบ ลากวางให้ถูกต้องนะ!`,
+        "กำลังสแกนไทม์ไลน์"
+      );
+      renderCardsAndZones();
+      startStageCardTimer();
+    }
+
+    function startStageCardTimer() {
+      const stage = GAME_DATA[gameState.currentStageIndex];
+      startActionTimer(stage.cardTimeLimit, () => {
+        handleCardTimeout();
+      });
+    }
+
+    // จัดการกรณีหมดเวลาในการวางการ์ด
+    function handleCardTimeout() {
+      if (gameState.phase !== "cards" || gameState.remainingCards.length === 0) return;
+      const stage = GAME_DATA[gameState.currentStageIndex];
+      sound.playError();
+      triggerGlitchShake();
+
+      gameState.hp = Math.max(0, gameState.hp - 15);
+      gameState.analytics.totalAttempts++;
+      gameState.analytics.eraStats[stage.id].total++;
+      gameState.analytics.mistakesLog.push({
+        eraId: stage.id,
+        eraName: stage.shortEraName,
+        topic: `หมดเวลาคัดแยกข้อมูลใน${stage.shortEraName}`,
+        reason: "ใช้เวลาตัดสินใจเกินกำหนด ทำให้ความเสถียรของไทม์ไลน์ลดลง"
+      });
+
+      updateHUD();
+      updateChronoBot(
+        "glitch",
+        "ระวัง! หมดเวลาสำหรับรายการนี้แล้ว ระบบได้รับความเสียหาย -15% รีบจัดเรียงการ์ดที่เหลือต่อเลย!",
+        "แจ้งเตือน Glitch หมดเวลา"
+      );
+      showToast("⏰ หมดเวลา! ความเสถียรระบบ -15%", "error");
+
+      if (gameState.hp <= 0) {
+        finishGame(false);
+      } else {
+        startStageCardTimer();
+      }
+    }
+
+    // เรนเดอร์การ์ดในคลังและกล่องวางทั้ง 2 กล่อง
+    function renderCardsAndZones() {
+      const deckGrid = document.getElementById("cards-deck-grid");
+      const remainingCount = document.getElementById("cards-remaining-count");
+      remainingCount.textContent = gameState.remainingCards.length;
+
+      deckGrid.innerHTML = "";
+      gameState.remainingCards.forEach((card) => {
+        const cardEl = document.createElement("div");
+        cardEl.className = "holo-card";
+        if (gameState.selectedCardId === card.id) cardEl.classList.add("selected");
+        if (gameState.hintedCardId === card.id) cardEl.classList.add("hint-highlight");
+        cardEl.setAttribute("draggable", "true");
+        cardEl.dataset.cardId = card.id;
+
+        cardEl.innerHTML = `
+          <div class="card-icon-box">
+            ${SVG_LIBRARY.getCardIcon(card.iconType)}
+          </div>
+          <div class="card-info">
+            <div class="card-title">${card.title}</div>
+            <div class="card-desc">${card.subtitle}</div>
+          </div>
+        `;
+
+        // รองรับ Mouse Drag & Drop
+        cardEl.addEventListener("dragstart", (e) => {
+          sound.playSelect();
+          gameState.selectedCardId = card.id;
+          cardEl.classList.add("dragging");
+          if (e.dataTransfer) {
+            e.dataTransfer.setData("text/plain", card.id);
+            e.dataTransfer.effectAllowed = "move";
+          }
+          highlightDropZones(true);
+        });
+
+        cardEl.addEventListener("dragend", () => {
+          cardEl.classList.remove("dragging");
+          highlightDropZones(false);
+        });
+
+        // รองรับการแตะ/คลิกเลือกการ์ด (Mobile/Tablet & Desktop Click-to-Place)
+        cardEl.addEventListener("click", () => {
+          sound.playSelect();
+          if (gameState.selectedCardId === card.id) {
+            gameState.selectedCardId = null;
+          } else {
+            gameState.selectedCardId = card.id;
+          }
+          renderCardsAndZones();
+        });
+
+        deckGrid.appendChild(cardEl);
+      });
+
+      // อัปเดตตัวบ่งชี้การ์ดที่เลือก
+      const indicator = document.getElementById("selected-card-indicator");
+      const selectedObj = gameState.remainingCards.find((c) => c.id === gameState.selectedCardId);
+      if (selectedObj) {
+        indicator.textContent = `เลือก: "${selectedObj.title}" ➔ แตะกล่องด้านล่าง`;
+        indicator.style.color = "var(--ancient-gold)";
+        highlightDropZones(true);
+      } else {
+        indicator.textContent = "ยังไม่ได้เลือกการ์ด";
+        indicator.style.color = "var(--text-muted)";
+        highlightDropZones(false);
+      }
+
+      // อัปเดตการ์ดที่วางแล้วในกล่องทั้ง 2
+      document.getElementById("zone-era-count").textContent = `${gameState.placedEraCards.length} / 6`;
+      document.getElementById("zone-quarantine-count").textContent = `${gameState.placedQuarantineCards.length} / 2`;
+
+      const eraChips = document.getElementById("zone-era-chips");
+      eraChips.innerHTML = gameState.placedEraCards
+        .map((c) => `<span class="placed-chip valid">✓ ${c.title}</span>`)
+        .join("");
+
+      const qChips = document.getElementById("zone-quarantine-chips");
+      qChips.innerHTML = gameState.placedQuarantineCards
+        .map((c) => `<span class="placed-chip quarantined">🛡️ ${c.title}</span>`)
+        .join("");
+    }
+
+    function highlightDropZones(active) {
+      const z1 = document.getElementById("zone-era");
+      const z2 = document.getElementById("zone-quarantine");
+      if (active) {
+        z1.classList.add("ready-target");
+        z2.classList.add("ready-target");
+      } else {
+        z1.classList.remove("ready-target", "drag-over");
+        z2.classList.remove("ready-target", "drag-over");
+      }
+    }
+
+    // ตรวจสอบความถูกต้องเมื่อผู้เล่นวางการ์ดลงในกล่องเป้าหมาย
+    function handleCardDrop(cardId, targetZone) {
+      if (gameState.phase !== "cards") return;
+      const cardIndex = gameState.remainingCards.findIndex((c) => c.id === cardId);
+      if (cardIndex === -1) return;
+
+      const card = gameState.remainingCards[cardIndex];
+      const stage = GAME_DATA[gameState.currentStageIndex];
+
+      // ตรวจสอบ: targetZone === "quarantine" ต้องตรงกับ card.isAnomaly === true
+      const isCorrect =
+        (targetZone === "quarantine" && card.isAnomaly) ||
+        (targetZone === "era" && !card.isAnomaly);
+
+      gameState.analytics.totalAttempts++;
+      gameState.analytics.eraStats[stage.id].total++;
+
+      const feedbackBox = document.getElementById("instant-feedback-box");
+
+      if (isCorrect) {
+        sound.playSuccess();
+        gameState.analytics.correctAttempts++;
+        gameState.analytics.eraStats[stage.id].correct++;
+
+        if (card.isAnomaly && !card.hadError) {
+          gameState.analytics.anomaliesCaughtCleanly++;
+        }
+
+        // คำนวณคะแนน + โบนัสความเร็ว
+        const speedBonus = Math.round((gameState.timeLeft / stage.cardTimeLimit) * 30);
+        const earnedPoints = 100 + speedBonus;
+        gameState.score += earnedPoints;
+        gameState.coins += 25;
+
+        // ย้ายการ์ดออกจากคลังไปยังกล่องที่ถูกต้อง
+        gameState.remainingCards.splice(cardIndex, 1);
+        if (targetZone === "era") {
+          gameState.placedEraCards.push(card);
+        } else {
+          gameState.placedQuarantineCards.push(card);
+        }
+
+        gameState.selectedCardId = null;
+        if (gameState.hintedCardId === card.id) gameState.hintedCardId = null;
+        feedbackBox.classList.remove("visible");
+
+        updateHUD();
+        updateChronoBot("celebrate", `ยอดเยี่ยม! ${card.feedback}`, "ยืนยันข้อมูลถูกต้อง");
+        showToast(`✓ ถูกต้อง! +${earnedPoints} คะแนน | +25 เหรียญ`, "success");
+        renderCardsAndZones();
+
+        // ตรวจสอบว่าจัดวางครบทั้ง 8 ใบหรือยัง
+        if (gameState.remainingCards.length === 0) {
+          stopActionTimer();
+          setTimeout(() => {
+            startQuizPhase();
+          }, 850);
+        } else {
+          startStageCardTimer();
+        }
+      } else {
+        // วางผิด! การ์ดเด้งกลับ ลด HP -15% และแสดงคำอธิบายประวัติศาสตร์ทันที
+        sound.playError();
+        triggerGlitchShake();
+        card.hadError = true;
+        if (card.isAnomaly) {
+          gameState.analytics.missedAnomalies++;
+        }
+
+        gameState.hp = Math.max(0, gameState.hp - 15);
+        gameState.selectedCardId = null;
+
+        gameState.analytics.mistakesLog.push({
+          eraId: stage.id,
+          eraName: stage.shortEraName,
+          topic: card.title,
+          reason: card.feedback
+        });
+
+        feedbackBox.innerHTML = `
+          <strong>⚠️ ตรวจพบความคลาดเคลื่อนของข้อมูล: "${card.title}"</strong>
+          <span>${card.feedback}</span>
+        `;
+        feedbackBox.classList.add("visible");
+
+        updateHUD();
+        updateChronoBot(
+          "glitch",
+          `เกิด Glitch! "${card.title}" ยังไม่ถูกต้อง ลองอ่านข้อมูลวิเคราะห์ด้านล่างแล้วจัดวางใหม่นะ!`,
+          "ตรวจพบความผิดพลาด"
+        );
+        showToast("✕ ข้อมูลไม่ตรงกับกล่องเป้าหมาย! HP -15%", "error");
+        renderCardsAndZones();
+
+        if (gameState.hp <= 0) {
+          stopActionTimer();
+          setTimeout(() => finishGame(false), 900);
+        } else {
+          startStageCardTimer();
+        }
+      }
+    }
+
+    // ปุ่มขอคำใบ้จาก AI (หัก 50 คะแนน)
+    function handleRequestAIHint() {
+      if (gameState.score < 50) {
+        sound.playError();
+        showToast("⚠️ คะแนนไม่เพียงพอ (ต้องใช้ 50 คะแนนเพื่อขอคำใบ้ AI)", "error");
+        return;
+      }
+
+      if (gameState.phase === "cards") {
+        if (gameState.remainingCards.length === 0) return;
+        let targetCard = gameState.remainingCards.find((c) => c.id === gameState.selectedCardId);
+        if (!targetCard) {
+          targetCard = gameState.remainingCards[0];
+          gameState.selectedCardId = targetCard.id;
+        }
+        gameState.hintedCardId = targetCard.id;
+        gameState.score -= 50;
+        sound.playHint();
+        updateHUD();
+        renderCardsAndZones();
+        updateChronoBot(
+          "thinking",
+          `[คำใบ้ AI สำหรับ "${targetCard.title}"]: ${targetCard.hint}`,
+          "กำลังวิเคราะห์ฐานข้อมูล"
+        );
+        showToast("💡 ใช้ 50 คะแนน เปิดคำใบ้ AI สำเร็จ", "gold");
+      } else if (gameState.phase === "quiz") {
+        if (gameState.quizAnswered || gameState.quizHintUsed) return;
+        const stage = GAME_DATA[gameState.currentStageIndex];
+        const quiz = stage.quizzes[gameState.currentQuizIndex];
+        gameState.score -= 50;
+        gameState.quizHintUsed = true;
+        sound.playHint();
+        updateHUD();
+
+        // ตัดตัวเลือกที่ผิดออก 1 ข้อ และแสดงคำใบ้ในกล่องอธิบาย
+        const optionBtns = document.querySelectorAll("#quiz-options-container .quiz-option-btn");
+        for (let i = 0; i < optionBtns.length; i++) {
+          if (i !== quiz.correctIndex) {
+            optionBtns[i].classList.add("eliminated");
+            break;
+          }
+        }
+
+        const expBox = document.getElementById("quiz-explanation-box");
+        expBox.innerHTML = `<strong style="color:var(--ancient-gold);">💡 คำใบ้จาก CHRONO-BOT:</strong> ${quiz.hint}`;
+        expBox.classList.add("visible");
+        document.getElementById("btn-quiz-hint").disabled = true;
+        showToast("💡 ใช้ 50 คะแนน ตัดตัวเลือกผิด 1 ข้อพร้อมคำใบ้", "gold");
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 6: เฟสที่ 2 - คำถามยืนยันการซ่อมแซมไทม์ไลน์ (TIMELINE QUIZ)
+     * =========================================================================
+     */
+    function startQuizPhase() {
+      gameState.phase = "quiz";
+      gameState.currentQuizIndex = 0;
+      updateHUD();
+      updateChronoBot(
+        "thinking",
+        "จัดเรียงการ์ดครบทั้ง 8 ใบแล้ว! ตอบคำถามยืนยันระบบอีก 2 ข้อเพื่อปิดผนึกไทม์ไลน์ยุคนี้!",
+        "รอการยืนยันระบบ Quiz"
+      );
+      document.getElementById("modal-quiz").classList.add("active");
+      loadQuizQuestion();
+    }
+
+    function loadQuizQuestion() {
+      const stage = GAME_DATA[gameState.currentStageIndex];
+      const quiz = stage.quizzes[gameState.currentQuizIndex];
+      gameState.quizAnswered = false;
+      gameState.quizHintUsed = false;
+
+      document.getElementById("quiz-progress-badge").textContent =
+        `คำถามยืนยันระบบข้อที่ ${gameState.currentQuizIndex + 1}/2 (${stage.shortEraName})`;
+      document.getElementById("quiz-question-text").textContent = quiz.question;
+
+      const hintBtn = document.getElementById("btn-quiz-hint");
+      hintBtn.disabled = false;
+
+      const expBox = document.getElementById("quiz-explanation-box");
+      expBox.classList.remove("visible");
+      expBox.innerHTML = "";
+
+      const nextBtn = document.getElementById("btn-quiz-next");
+      nextBtn.style.display = "none";
+
+      const optionsContainer = document.getElementById("quiz-options-container");
+      optionsContainer.innerHTML = "";
+      const letters = ["ก", "ข", "ค", "ง"];
+
+      quiz.options.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "quiz-option-btn";
+        btn.innerHTML = `
+          <span class="opt-letter">${letters[idx]}</span>
+          <span>${optText}</span>
+        `;
+        btn.addEventListener("click", () => handleQuizAnswer(idx));
+        optionsContainer.appendChild(btn);
+      });
+
+      startActionTimer(stage.quizTimeLimit, () => {
+        handleQuizAnswer(-1); // -1 หมายถึงหมดเวลา
+      });
+    }
+
+    function handleQuizAnswer(selectedIndex) {
+      if (gameState.quizAnswered) return;
+      gameState.quizAnswered = true;
+      stopActionTimer();
+
+      const stage = GAME_DATA[gameState.currentStageIndex];
+      const quiz = stage.quizzes[gameState.currentQuizIndex];
+      const isCorrect = selectedIndex === quiz.correctIndex;
+
+      gameState.analytics.totalAttempts++;
+      gameState.analytics.eraStats[stage.id].total++;
+
+      const optionBtns = document.querySelectorAll("#quiz-options-container .quiz-option-btn");
+      optionBtns.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === quiz.correctIndex) {
+          btn.classList.add("correct");
+        } else if (idx === selectedIndex) {
+          btn.classList.add("wrong");
+        }
+      });
+
+      const expBox = document.getElementById("quiz-explanation-box");
+
+      if (isCorrect) {
+        sound.playSuccess();
+        gameState.analytics.correctAttempts++;
+        gameState.analytics.eraStats[stage.id].correct++;
+        gameState.score += 150;
+        gameState.coins += 40;
+        updateHUD();
+        updateChronoBot("celebrate", "คำตอบถูกต้องแม่นยำ! ระบบไทม์ไลน์กำลังเสถียรขึ้นแล้ว!", "ยืนยันสำเร็จ");
+        expBox.innerHTML = `<strong style="color:var(--success-green);">✓ ถูกต้อง (+150 คะแนน | +40 เหรียญ):</strong> ${quiz.explanation}`;
+      } else {
+        sound.playError();
+        triggerGlitchShake();
+        gameState.hp = Math.max(0, gameState.hp - 15);
+        updateHUD();
+
+        gameState.analytics.mistakesLog.push({
+          eraId: stage.id,
+          eraName: stage.shortEraName,
+          topic: quiz.question,
+          reason: quiz.explanation
+        });
+
+        const reasonTitle = selectedIndex === -1 ? "⏰ หมดเวลาตอบคำถาม!" : "✕ คำตอบยังไม่ถูกต้อง!";
+        updateChronoBot("glitch", "เกิดความคลาดเคลื่อนในการยืนยันระบบ! ความเสถียรลดลง -15%", "เตือนภัยระบบ");
+        expBox.innerHTML = `<strong style="color:var(--glitch-red);">${reasonTitle} (HP -15%):</strong> ${quiz.explanation}`;
+      }
+
+      expBox.classList.add("visible");
+      document.getElementById("btn-quiz-hint").disabled = true;
+
+      const nextBtn = document.getElementById("btn-quiz-next");
+      if (gameState.hp <= 0) {
+        nextBtn.textContent = "ดูสรุปผลการปฏิบัติภารกิจ ➔";
+      } else if (gameState.currentQuizIndex === 0) {
+        nextBtn.textContent = "คำถามข้อที่ 2 ➔";
+      } else if (gameState.currentStageIndex < GAME_DATA.length - 1) {
+        nextBtn.textContent = "เข้าสู่ยุคสมัยถัดไป ➔";
+      } else {
+        nextBtn.textContent = "เสร็จสิ้นภารกิจ & ดู Dashboard ➔";
+      }
+      nextBtn.style.display = "inline-flex";
+    }
+
+    function advanceAfterQuiz() {
+      sound.playSelect();
+      if (gameState.hp <= 0) {
+        document.getElementById("modal-quiz").classList.remove("active");
+        finishGame(false);
+        return;
+      }
+
+      if (gameState.currentQuizIndex < 1) {
+        gameState.currentQuizIndex++;
+        loadQuizQuestion();
+      } else {
+        document.getElementById("modal-quiz").classList.remove("active");
+        // ผ่านด่านสำเร็จ! ฟื้นฟูความเสถียร +15% (สูงสุด 100%)
+        if (gameState.currentStageIndex < GAME_DATA.length - 1) {
+          gameState.hp = Math.min(100, gameState.hp + 15);
+          sound.playVictory();
+          showToast("🎉 ซ่อมแซมไทม์ไลน์ยุคนี้สำเร็จ! ฟื้นฟู HP +15%", "gold");
+          loadStage(gameState.currentStageIndex + 1);
+        } else {
+          // จบครบทั้ง 3 ด่าน ตรวจสอบเงื่อนไขความแม่นยำ >= 70%
+          const acc = calculateAccuracy();
+          const isVictory = gameState.hp > 0 && acc >= 70;
+          finishGame(isVictory);
+        }
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 7: ระบบประเมินผลและ DASHBOARD วิเคราะห์การเรียนรู้ (ANALYTICS & STORAGE)
+     * =========================================================================
+     */
+    function calculateAccuracy() {
+      const { totalAttempts, correctAttempts } = gameState.analytics;
+      if (totalAttempts === 0) return 0;
+      return Math.round((correctAttempts / totalAttempts) * 100);
+    }
+
+    function getStoredHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { highScore: 0, runs: [] };
+        const parsed = JSON.parse(raw);
+        return {
+          highScore: parsed.highScore || 0,
+          runs: Array.isArray(parsed.runs) ? parsed.runs : []
+        };
+      } catch (e) {
+        return { highScore: 0, runs: [] };
+      }
+    }
+
+    function saveRunToStorage(isVictory, accuracy) {
+      try {
+        const data = getStoredHistory();
+        if (gameState.score > data.highScore) {
+          data.highScore = gameState.score;
+        }
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("th-TH", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        data.runs.unshift({
+          date: dateStr,
+          victory: isVictory,
+          score: gameState.score,
+          coins: gameState.coins,
+          accuracy: accuracy,
+          eraStats: JSON.parse(JSON.stringify(gameState.analytics.eraStats)),
+          mistakesLog: gameState.analytics.mistakesLog.slice(0, 6)
+        });
+        // เก็บประวัติสูงสุด 15 รอบล่าสุด
+        data.runs = data.runs.slice(0, 15);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        // กรณีเบราว์เซอร์ปิดกั้น LocalStorage
+      }
+    }
+
+    function finishGame(isVictory) {
+      stopActionTimer();
+      const accuracy = calculateAccuracy();
+      saveRunToStorage(isVictory, accuracy);
+
+      if (isVictory) {
+        sound.playVictory();
+      } else {
+        sound.playError();
+      }
+
+      renderDashboard(true, isVictory, accuracy);
+      showScreen("screen-dashboard");
+    }
+
+    function openDashboardFromStart() {
+      sound.playSelect();
+      const stored = getStoredHistory();
+      const latestRun = stored.runs[0];
+      if (latestRun) {
+        gameState.score = latestRun.score;
+        gameState.coins = latestRun.coins;
+        gameState.analytics.eraStats = latestRun.eraStats || gameState.analytics.eraStats;
+        gameState.analytics.mistakesLog = latestRun.mistakesLog || [];
+        renderDashboard(false, latestRun.victory, latestRun.accuracy);
+      } else {
+        renderDashboard(false, null, 0);
+      }
+      showScreen("screen-dashboard");
+    }
+
+    function renderDashboard(isJustFinished, isVictory, accuracy) {
+      const stored = getStoredHistory();
+      const banner = document.getElementById("result-banner");
+      const botMount = document.getElementById("dashboard-bot-mount");
+      const titleEl = document.getElementById("result-title");
+      const subEl = document.getElementById("result-subtitle");
+      const starsRow = document.getElementById("result-stars");
+
+      banner.classList.remove("victory", "defeat");
+
+      if (isVictory === true) {
+        banner.classList.add("victory");
+        botMount.innerHTML = SVG_LIBRARY.getChronoBot("celebrate", true);
+        titleEl.textContent = "🎉 กู้คืนไทม์ไลน์ประวัติศาสตร์สำเร็จ!";
+        titleEl.style.color = "var(--success-green)";
+        subEl.textContent = `ยอดเยี่ยมมาก! คุณซ่อมแซมทั้ง 3 ยุคสมัยด้วยความแม่นยำ ${accuracy}% และรักษาเสถียรภาพระบบไว้ได้`;
+      } else if (isVictory === false) {
+        banner.classList.add("defeat");
+        botMount.innerHTML = SVG_LIBRARY.getChronoBot("glitch", true);
+        titleEl.textContent = "⚠️ ภารกิจล้มเหลว: ไทม์ไลน์ยังไม่เสถียร";
+        titleEl.style.color = "var(--glitch-red)";
+        subEl.textContent =
+          gameState.hp <= 0
+            ? "ค่าความเสถียรระบบ (HP) ลดลงเหลือ 0% มาดูจุดที่ต้องทบทวนด้านล่างแล้วลองใหม่กันนะ!"
+            : `ความแม่นยำรวมอยู่ที่ ${accuracy}% (เกณฑ์ผ่านคือ 70% ขึ้นไป) ทบทวนจุดผิดพลาดแล้วกู้คืนไทม์ไลน์อีกครั้ง!`;
+      } else {
+        botMount.innerHTML = SVG_LIBRARY.getChronoBot("normal", true);
+        titleEl.textContent = "📊 Dashboard วิเคราะห์ผลการเรียนรู้รายบุคคล";
+        titleEl.style.color = "var(--neon-cyan)";
+        subEl.textContent = "ยังไม่มีประวัติการเล่นในเครื่องนี้ กด 'เล่นภารกิจอีกครั้ง' เพื่อเริ่มบันทึกผลการเรียนรู้";
+      }
+
+      // คำนวณดาว (1-3 ดาว)
+      let earnedStars = 0;
+      if (isVictory === true) {
+        earnedStars = accuracy >= 90 ? 3 : accuracy >= 80 ? 2 : 1;
+      } else if (isVictory === false && accuracy >= 50) {
+        earnedStars = 1;
+      }
+
+      starsRow.innerHTML = [1, 2, 3]
+        .map((n) => {
+          const active = n <= earnedStars;
+          return `
+            <svg class="star-svg" viewBox="0 0 24 24" fill="${active ? '#FFD166' : 'rgba(255,255,255,0.1)'}" stroke="${active ? '#FF9F1C' : '#475569'}" stroke-width="1.6">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          `;
+        })
+        .join("");
+
+      // ตัวเลขสรุป 4 ช่อง
+      document.getElementById("dash-score").textContent = gameState.score.toLocaleString();
+      document.getElementById("dash-highscore").textContent = stored.highScore.toLocaleString();
+      document.getElementById("dash-coins").textContent = gameState.coins.toLocaleString();
+      document.getElementById("dash-accuracy").textContent = `${accuracy}%`;
+
+      // เรนเดอร์กราฟแท่งแยกตาม 3 ยุคสมัย
+      const chartContainer = document.getElementById("era-chart-container");
+      const eraColors = {
+        1: "linear-gradient(90deg, #00F0FF, #3B82F6)",
+        2: "linear-gradient(90deg, #9D4EDD, #EC4899)",
+        3: "linear-gradient(90deg, #FFD166, #06D6A0)"
+      };
+
+      const eraAccuracies = {};
+      chartContainer.innerHTML = GAME_DATA.map((stage) => {
+        const st = gameState.analytics.eraStats[stage.id] || { correct: 0, total: 0 };
+        const pct = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+        eraAccuracies[stage.id] = { pct, total: st.total, name: stage.shortEraName };
+        return `
+          <div class="era-bar-item">
+            <div class="era-bar-meta">
+              <span>ด่าน ${stage.id}: ${stage.shortEraName}</span>
+              <span style="font-family:var(--font-mono); color:var(--neon-cyan);">${pct}% (${st.correct}/${st.total})</span>
+            </div>
+            <div class="era-bar-track">
+              <div class="era-bar-fill" style="width:${pct}%; background:${eraColors[stage.id]};"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // สร้างข้อเสนอแนะรายบุคคลอัตโนมัติ (Individualized Learning Recommendations)
+      const recContainer = document.getElementById("recommendations-container");
+      const recs = [];
+
+      const playedEras = Object.values(eraAccuracies).filter((e) => e.total > 0);
+      if (playedEras.length === 0) {
+        recs.push(`<div class="rec-item">เริ่มต้นเล่นภารกิจเพื่อให้ CHRONO-BOT วิเคราะห์จุดแข็งและจุดที่ควรพัฒนาในแต่ละยุคสมัย</div>`);
+      } else {
+        // หาด่านที่คะแนนความแม่นยำต่ำที่สุด
+        const sortedByWeakest = [...playedEras].sort((a, b) => a.pct - b.pct);
+        const weakest = sortedByWeakest[0];
+        const strongest = sortedByWeakest[sortedByWeakest.length - 1];
+
+        if (strongest.pct >= 80) {
+          recs.push(
+            `<div class="rec-item good"><strong>🌟 จุดแข็งที่โดดเด่น:</strong> คุณเข้าใจบริบทของ <strong>${strongest.name}</strong> ได้ดีมาก (${strongest.pct}%) สามารถเชื่อมโยงบุคคลและสิ่งประดิษฐ์ได้แม่นยำ</div>`
+          );
+        }
+
+        if (weakest.pct < 80) {
+          recs.push(
+            `<div class="rec-item warn"><strong>📌 ยุคสมัยที่ควรทบทวนเพิ่มเติม:</strong> <strong>${weakest.name}</strong> (ความแม่นยำ ${weakest.pct}%) แนะนำให้ทบทวนเส้นเวลา (Chronology) เปรียบเทียบเหตุการณ์สำคัญในยุโรปและเอเชียในช่วงเวลาเดียวกัน</div>`
+          );
+        } else {
+          recs.push(
+            `<div class="rec-item good"><strong>🏆 ความเชี่ยวชาญรอบด้าน:</strong> คุณทำคะแนนความแม่นยำได้สูงในทุกยุคสมัย ลองท้าทายตนเองด้วยการทำเวลาให้เร็วขึ้นเพื่อสะสมโบนัสสูงสุด!</div>`
+          );
+        }
+
+        // แสดงหัวข้อเฉพาะที่ตอบผิดในรอบนี้ (สูงสุด 3 รายการ)
+        const uniqueMistakes = [];
+        const seenTopics = new Set();
+        for (const m of gameState.analytics.mistakesLog) {
+          if (!seenTopics.has(m.topic)) {
+            seenTopics.add(m.topic);
+            uniqueMistakes.push(m);
+          }
+        }
+
+        uniqueMistakes.slice(0, 3).forEach((m) => {
+          recs.push(
+            `<div class="rec-item"><strong>🔎 ทบทวนประเด็น [${m.eraName}]:</strong> ${m.topic}<br/><span style="color:var(--text-muted); font-size:0.84rem;">${m.reason}</span></div>`
+          );
+        });
+      }
+      recContainer.innerHTML = recs.join("");
+
+      // เรนเดอร์ตราประทับเกียรติยศ (Badges)
+      const badgesList = [
+        {
+          title: "ผู้พิทักษ์ยุคโบราณ",
+          desc: "ความแม่นยำด่าน 1 ≥ 80%",
+          icon: "🏛️",
+          unlocked: eraAccuracies[1].total > 0 && eraAccuracies[1].pct >= 80
+        },
+        {
+          title: "ปราชญ์แห่งการฟื้นฟู",
+          desc: "ความแม่นยำด่าน 2 ≥ 80%",
+          icon: "🎨",
+          unlocked: eraAccuracies[2].total > 0 && eraAccuracies[2].pct >= 80
+        },
+        {
+          title: "สถาปนิกโลกสมัยใหม่",
+          desc: "ความแม่นยำด่าน 3 ≥ 80%",
+          icon: "🚀",
+          unlocked: eraAccuracies[3].total > 0 && eraAccuracies[3].pct >= 80
+        },
+        {
+          title: "นักล่า Glitch ตัวจริง",
+          desc: "กักกันการ์ดผิดยุคครบ 6 ใบโดยไม่พลาด",
+          icon: "🛡️",
+          unlocked: gameState.analytics.anomaliesCaughtCleanly >= 6
+        },
+        {
+          title: "ปรมาจารย์กาลเวลา",
+          desc: "ชนะภารกิจด้วยความแม่นยำ ≥ 90%",
+          icon: "👑",
+          unlocked: isVictory === true && accuracy >= 90
+        }
+      ];
+
+      document.getElementById("badges-container").innerHTML = badgesList
+        .map(
+          (b) => `
+          <div class="badge-item ${b.unlocked ? "unlocked" : ""}">
+            <div style="font-size:1.75rem;">${b.icon}</div>
+            <div class="badge-item-title">${b.title}</div>
+            <div class="badge-item-desc">${b.desc}</div>
+          </div>
+        `
+        )
+        .join("");
+
+      // เรนเดอร์ตารางประวัติการเล่นใน LocalStorage
+      const tbody = document.getElementById("history-table-body");
+      if (stored.runs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">ยังไม่มีประวัติการบันทึกในเครื่อง</td></tr>`;
+      } else {
+        tbody.innerHTML = stored.runs
+          .map(
+            (r, idx) => `
+            <tr>
+              <td>#${stored.runs.length - idx}</td>
+              <td>${r.date}</td>
+              <td style="color:${r.victory ? "var(--success-green)" : "var(--glitch-red)"}; font-weight:600;">
+                ${r.victory ? "✓ กู้คืนสำเร็จ" : "✕ ไม่ผ่านเกณฑ์"}
+              </td>
+              <td style="font-family:var(--font-mono);">${r.score.toLocaleString()}</td>
+              <td style="font-family:var(--font-mono);">${r.accuracy}%</td>
+            </tr>
+          `
+          )
+          .join("");
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 8: ระบบส่งออกไฟล์เกม Standalone HTML สำหรับใช้งาน Offline
+     * =========================================================================
+     */
+    function downloadStandaloneHTML() {
+      sound.playSelect();
+      try {
+        // โคลนเอกสารเพื่อรีเซ็ตหน้าจอให้เปิดเริ่มต้นที่หน้าต้อนรับอย่างสมบูรณ์
+        const clonedDoc = document.documentElement.cloneNode(true);
+        clonedDoc.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+        const startScreen = clonedDoc.querySelector("#screen-start");
+        if (startScreen) startScreen.classList.add("active");
+        clonedDoc.querySelectorAll(".modal-backdrop").forEach((m) => m.classList.remove("active"));
+        const toasts = clonedDoc.querySelector("#toast-container");
+        if (toasts) toasts.innerHTML = "";
+
+        const htmlString = "<!DOCTYPE html>\n" + clonedDoc.outerHTML;
+        const blob = new Blob([htmlString], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "History_Glitch_Offline_Game.html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        showToast("📥 ดาวน์โหลดไฟล์ History_Glitch_Offline_Game.html สำเร็จ!", "success");
+      } catch (err) {
+        showToast("⚠️ ไม่สามารถดาวน์โหลดอัตโนมัติได้ กรุณากด Ctrl+S เพื่อบันทึกหน้าเว็บ", "error");
+      }
+    }
+
+    /**
+     * =========================================================================
+     * ส่วนที่ 9: INITIALIZATION & EVENT LISTENERS
+     * =========================================================================
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+      initStarfield();
+
+      // ติดตั้ง SVG ตัวละคร CHRONO-BOT บนหน้าต้อนรับและหน้าเล่นเกม
+      document.getElementById("start-bot-mount").innerHTML = SVG_LIBRARY.getChronoBot("normal", true);
+      document.getElementById("game-bot-mount").innerHTML = SVG_LIBRARY.getChronoBot("normal", false);
+
+      // ปุ่มหน้าต้อนรับ
+      document.getElementById("btn-start-game").addEventListener("click", startNewGame);
+      document.getElementById("btn-open-dashboard-start").addEventListener("click", openDashboardFromStart);
+      document.getElementById("btn-download-html").addEventListener("click", downloadStandaloneHTML);
+
+      // ปุ่มวิธีเล่น
+      document.getElementById("btn-open-howto").addEventListener("click", () => {
+        sound.playSelect();
+        document.getElementById("modal-howto").classList.add("active");
+      });
+      document.getElementById("btn-close-howto").addEventListener("click", () => {
+        sound.playSelect();
+        document.getElementById("modal-howto").classList.remove("active");
+      });
+      document.getElementById("btn-close-howto-bottom").addEventListener("click", () => {
+        sound.playSelect();
+        document.getElementById("modal-howto").classList.remove("active");
+      });
+
+      // ปุ่มเปิด/ปิดเสียง (ซิงก์ทั้งหน้าแรกและในเกม)
+      function syncSoundButtons() {
+        const isOn = sound.toggle();
+        document.getElementById("sound-start-label").textContent = isOn ? "🔊 เสียง: เปิด" : "🔇 เสียง: ปิด";
+        document.getElementById("btn-sound-game").textContent = isOn ? "🔊" : "🔇";
+        showToast(isOn ? "🔊 เปิดระบบเสียงสังเคราะห์แล้ว" : "🔇 ปิดเสียงแล้ว", "info");
+      }
+      document.getElementById("btn-sound-start").addEventListener("click", syncSoundButtons);
+      document.getElementById("btn-sound-game").addEventListener("click", syncSoundButtons);
+
+      // ปุ่มขอคำใบ้ AI
+      document.getElementById("btn-ai-hint").addEventListener("click", handleRequestAIHint);
+      document.getElementById("btn-quiz-hint").addEventListener("click", handleRequestAIHint);
+      document.getElementById("btn-quiz-next").addEventListener("click", advanceAfterQuiz);
+
+      // ตั้งค่า Drop Zones (รองรับทั้ง Drag & Drop และ Tap/Click)
+      ["zone-era", "zone-quarantine"].forEach((zoneId) => {
+        const zoneEl = document.getElementById(zoneId);
+        const zoneType = zoneEl.dataset.zone;
+
+        zoneEl.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zoneEl.classList.add("drag-over");
+        });
+
+        zoneEl.addEventListener("dragleave", () => {
+          zoneEl.classList.remove("drag-over");
+        });
+
+        zoneEl.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zoneEl.classList.remove("drag-over");
+          const draggedId = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || gameState.selectedCardId;
+          if (draggedId) {
+            handleCardDrop(draggedId, zoneType);
+          }
+        });
+
+        // แตะ/คลิกกล่องเพื่อวางการ์ดที่เลือกไว้
+        zoneEl.addEventListener("click", () => {
+          if (gameState.selectedCardId) {
+            handleCardDrop(gameState.selectedCardId, zoneType);
+          } else {
+            showToast("👆 กรุณาแตะเลือกการ์ดข้อมูลทางซ้ายก่อน แล้วจึงแตะกล่องวาง", "info");
+          }
+        });
+      });
+
+      // ปุ่มออกจากด่าน (ใช้ Custom Modal)
+      document.getElementById("btn-quit-game").addEventListener("click", () => {
+        sound.playSelect();
+        document.getElementById("modal-quit").classList.add("active");
+      });
+      document.getElementById("btn-cancel-quit").addEventListener("click", () => {
+        sound.playSelect();
+        document.getElementById("modal-quit").classList.remove("active");
+      });
+      document.getElementById("btn-confirm-quit").addEventListener("click", () => {
+        sound.playSelect();
+        stopActionTimer();
+        document.getElementById("modal-quit").classList.remove("active");
+        document.getElementById("modal-quiz").classList.remove("active");
+        showScreen("screen-start");
+      });
+
+      // ปุ่มหน้า Dashboard
+      document.getElementById("btn-play-again").addEventListener("click", startNewGame);
+      document.getElementById("btn-back-home").addEventListener("click", () => {
+        sound.playSelect();
+        showScreen("screen-start");
+      });
+      document.getElementById("btn-clear-history").addEventListener("click", () => {
+        sound.playSelect();
+        localStorage.removeItem(STORAGE_KEY);
+        renderDashboard(false, null, 0);
+        showToast("🗑️ ล้างประวัติสถิติการเรียนรู้เรียบร้อยแล้ว", "info");
+      });
+    });
+  </script>
+
+</body></html>
